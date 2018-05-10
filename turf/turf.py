@@ -1,35 +1,5 @@
 #!/usr/bin/env python3
 
-# ipdb> x = tree.getroot().findall('{http://www.loc.gov/MARC21/slim}record')
-# ipdb> x
-# [<Element '{http://www.loc.gov/MARC21/slim}record' at 0x108876278>, <Element '{http://www.loc.gov/MARC21/slim}record' at 0x1088764f8>, <Element '{http://www.loc.gov/MARC21/slim}record' at 0x108876598>, <Element '{http://www.loc.gov/MARC21/slim}record' at 0x108876638>, <Element '{http://www.loc.gov/MARC21/slim}record' at 0x1088766d8>, <Element '{http://www.loc.gov/MARC21/slim}record' at 0x108876778>, <Element '{http://www.loc.gov/MARC21/slim}record' at 0x108876818>, <Element '{http://www.loc.gov/MARC21/slim}record' at 0x1088768b8>, <Element '{http://www.loc.gov/MARC21/slim}record' at 0x108876958>, <Element '{http://www.loc.gov/MARC21/slim}record' at 0x1088769f8>, <Element '{http://www.loc.gov/MARC21/slim}record' at 0x108876a98>, <Element '{http://www.loc.gov/MARC21/slim}record' at 0x108876b38>, <Element '{http://www.loc.gov/MARC21/slim}record' at 0x108876bd8>, <Element '{http://www.loc.gov/MARC21/slim}record' at 0x108876c78>, <Element '{http://www.loc.gov/MARC21/slim}record' at 0x108876d18>, <Element '{http://www.loc.gov/MARC21/slim}record' at 0x108876db8>, <Element '{http://www.loc.gov/MARC21/slim}record' at 0x108876e58>, <Element '{http://www.loc.gov/MARC21/slim}record' at 0x108876ef8>, <Element '{http://www.loc.gov/MARC21/slim}record' at 0x108876f98>, <Element '{http://www.loc.gov/MARC21/slim}record' at 0x108879098>, <Element '{http://www.loc.gov/MARC21/slim}record' at 0x108879138>, <Element '{http://www.loc.gov/MARC21/slim}record' at 0x1088791d8>, <Element '{http://www.loc.gov/MARC21/slim}record' at 0x108879278>, <Element '{http://www.loc.gov/MARC21/slim}record' at 0x108879318>, <Element '{http://www.loc.gov/MARC21/slim}record' at 0x1088793b8>]
-# ipdb> x[0]
-# <Element '{http://www.loc.gov/MARC21/slim}record' at 0x108876278>
-# ipdb> x.findall('{http://www.loc.gov/MARC21/slim}datafield')
-# *** AttributeError: 'list' object has no attribute 'findall'
-# ipdb> x[0].findall('{http://www.loc.gov/MARC21/slim}datafield')
-# [<Element '{http://www.loc.gov/MARC21/slim}datafield' at 0x1088763b8>]
-# ipdb>
-# [<Element '{http://www.loc.gov/MARC21/slim}datafield' at 0x1088763b8>]
-# ipdb> y = x[0].findall('{http://www.loc.gov/MARC21/slim}datafield')
-# ipdb> y
-# [<Element '{http://www.loc.gov/MARC21/slim}datafield' at 0x1088763b8>]
-# ipdb> y[0]
-# <Element '{http://www.loc.gov/MARC21/slim}datafield' at 0x1088763b8>
-# ipdb> y[0].tag
-# '{http://www.loc.gov/MARC21/slim}datafield'
-# ipdb> y[0].findall('{http://www.loc.gov/MARC21/slim}subfield')
-# [<Element '{http://www.loc.gov/MARC21/slim}subfield' at 0x108876408>, <Element '{http://www.loc.gov/MARC21/slim}subfield' at 0x108876458>]
-# ipdb> f = y[0].findall('{http://www.loc.gov/MARC21/slim}subfield')
-# ipdb> f
-# [<Element '{http://www.loc.gov/MARC21/slim}subfield' at 0x108876408>, <Element '{http://www.loc.gov/MARC21/slim}subfield' at 0x108876458>]
-# ipdb> f[0]
-# <Element '{http://www.loc.gov/MARC21/slim}subfield' at 0x108876408>
-# ipdb> f[0].tag
-# '{http://www.loc.gov/MARC21/slim}subfield'
-# ipdb> f[0].text
-# 'https://clsproxy.library.caltech.edu/login?url=http://search.ebscohost.com/login.aspx?CustID=s8984125&db=edspub&type=44&bQuery=AN%2065536&direct=true&site=pfi-live'
-
 import http.client
 from   http.client import responses as http_responses
 import os
