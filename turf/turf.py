@@ -93,6 +93,8 @@ def entries_from_search(search, count, colorize, quiet):
     search = substituted(search, '&of=', '&of=xm')
     # Get results in batches of a certain number of records.
     search = substituted(search, '&rg=', '&rg=' + str(count))
+    # Remove any 'ot' field because it screws up results.
+    search = substituted(search, '&ot=', '')
     # Do a search & iterate over the results until we can't anymore.
     start = 1
     results = []
@@ -139,11 +141,15 @@ def _entries_with_urls(marcxml, colorize, quiet):
                             break
         if tind_id:
             destination_url = results_tuple[1] if results_tuple else None
+            if len(e) <= 1:
+                msg('Empty result for {}'.format(tind_id), 'warn', colorize)
             if not quiet:
                 if results_tuple:
-                    msg('{}: {} => {}'.format(tind_id, original_url, destination_url))
+                    msg('{}: {} => {}'.format(color(tind_id, 'info', colorize),
+                                              color(original_url, 'info', colorize),
+                                              color(destination_url, 'blue', colorize)))
                 else:
-                    msg('{}'.format(tind_id))
+                    msg('{}'.format(tind_id), 'info', colorize)
             results.append([tind_id, original_url, destination_url])
     return results
 
