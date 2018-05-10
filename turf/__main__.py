@@ -146,13 +146,31 @@ def write_csv(filename, results):
 
 def write_xls(filename, results):
     import openpyxl
+    from openpyxl.styles import Font
+    from openpyxl.utils import get_column_letter
+
+    # Create a sheet in a new workbook and give it a distinctive style.
     wb = openpyxl.Workbook()
     sheet = wb.active
     sheet.title = 'Results'
     sheet.sheet_properties.tabColor = 'f7ba0b'
+
+    # Set the headings and format them a little bit.
     sheet.append(['TIND record id', 'Original URL', 'Updated URL'])
-    for row in results:
-        sheet.append(row)
+    bold_font = Font(bold = True, underline = "single")
+    for cell in sheet["1:1"]:
+        cell.font = bold_font
+
+    # Set the widths of the different columngs to something more convenient.
+    col_letter = get_column_letter(1)
+    sheet.column_dimensions[col_letter].width = 15
+    col_letter = get_column_letter(2)
+    sheet.column_dimensions[col_letter].width = 100
+    col_letter = get_column_letter(3)
+    sheet.column_dimensions[col_letter].width = 100
+    for row, data in enumerate(results, 2):
+        for col, value in enumerate(data, 0):
+            sheet.cell(row, col + 1).value = data[col]
     wb.save(filename = filename)
 
 
