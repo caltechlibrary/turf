@@ -88,11 +88,11 @@ _EDS_ROOT_URL = 'http://web.b.ebscohost.com/pfi/detail/detail?vid=4&bdata=JnNjb3
 # field 001 is the tind record number
 # field 856 is a URL, if there is one
 
-def entries_from_search(search, colorize, quiet):
+def entries_from_search(search, count, colorize, quiet):
     # Substitute the output format to be MARCXML.
     search = substituted(search, '&of=', '&of=xm')
-    # Ask for 1000 results at a time.
-    search = substituted(search, '&rg=', '&rg=100')
+    # Get results in batches of a certain number of records.
+    search = substituted(search, '&rg=', '&rg=' + str(count))
     # Do a search & iterate over the results until we can't anymore.
     start = 1
     results = []
@@ -108,7 +108,7 @@ def entries_from_search(search, colorize, quiet):
     return results
 
 
-def entries_from_file(file, colorize, quiet):
+def entries_from_file(file, count, colorize, quiet):
     xmlcontent = None
     results = []
     with open(file) as f:
@@ -123,6 +123,7 @@ def _entries_with_urls(marcxml, colorize, quiet):
         tind_id = ''
         url = ''
         results_tuple = None
+        original_url = None
         for child in e:
             if child.tag == '{http://www.loc.gov/MARC21/slim}controlfield':
                 if 'tag' in child.attrib and child.attrib['tag'] == '001':
@@ -143,7 +144,7 @@ def _entries_with_urls(marcxml, colorize, quiet):
                     msg('{}: {} => {}'.format(tind_id, original_url, destination_url))
                 else:
                     msg('{}'.format(tind_id))
-            results.append([tind_id, destination_url])
+            results.append([tind_id, original_url, destination_url])
     return results
 
 
