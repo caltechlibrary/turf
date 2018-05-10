@@ -90,7 +90,10 @@ _EDS_ROOT_URL = 'http://web.b.ebscohost.com/pfi/detail/detail?vid=4&bdata=JnNjb3
 
 def entries_from_search(search, max_records, colorize, quiet):
     # Get results in batches of a certain number of records.
-    search = substituted(search, '&rg=', '&rg=' + str(_FETCH_COUNT))
+    if max_records:
+        search = substituted(search, '&rg=', '&rg=' + str(max_records))
+    else:
+        search = substituted(search, '&rg=', '&rg=' + str(_FETCH_COUNT))
     # Substitute the output format to be MARCXML.
     search = substituted(search, '&of=', '&of=xm')
     # Remove any 'ot' field because it screws up results.
