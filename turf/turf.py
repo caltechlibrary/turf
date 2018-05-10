@@ -90,7 +90,7 @@ _EDS_ROOT_URL = 'http://web.b.ebscohost.com/pfi/detail/detail?vid=4&bdata=JnNjb3
 
 def entries_from_search(search, max_records, colorize, quiet):
     # Get results in batches of a certain number of records.
-    if max_records:
+    if max_records and max_records < _FETCH_COUNT:
         search = substituted(search, '&rg=', '&rg=' + str(max_records))
     else:
         search = substituted(search, '&rg=', '&rg=' + str(_FETCH_COUNT))
