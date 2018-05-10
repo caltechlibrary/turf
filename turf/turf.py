@@ -64,7 +64,7 @@ if __debug__:
 # Global constants.
 # .............................................................................
 
-_DEFAULT_FETCH_COUNT = 1000
+_FETCH_COUNT = 100
 '''How many entries to get at one time from caltech.tind.io.'''
 
 _NETWORK_TIMEOUT = 15
@@ -88,17 +88,17 @@ _EDS_ROOT_URL = 'http://web.b.ebscohost.com/pfi/detail/detail?vid=4&bdata=JnNjb3
 # field 001 is the tind record number
 # field 856 is a URL, if there is one
 
-def entries_from_search(search, count, colorize, quiet):
+def entries_from_search(search, max_records, colorize, quiet):
+    # Get results in batches of a certain number of records.
+    search = substituted(search, '&rg=', '&rg=' + str(_FETCH_COUNT))
     # Substitute the output format to be MARCXML.
     search = substituted(search, '&of=', '&of=xm')
-    # Get results in batches of a certain number of records.
-    search = substituted(search, '&rg=', '&rg=' + str(count))
     # Remove any 'ot' field because it screws up results.
     search = substituted(search, '&ot=', '')
     # Do a search & iterate over the results until we can't anymore.
     start = 1
     results = []
-    while start > 0:
+    while start > 0 and start < max_records:
         records = tind_records(search, start)
         if records:
             url_data = _entries_with_urls(records, colorize, quiet)
@@ -107,10 +107,12 @@ def entries_from_search(search, count, colorize, quiet):
             sleep(1)                    # Be nice to the server.
         else:
             start = -1
+    if start > max_records:
+        msg('Stopped after {} records processed'.format(max_records), 'warn', colorize)
     return results
 
 
-def entries_from_file(file, count, colorize, quiet):
+def entries_from_file(file, max_records, colorize, quiet):
     xmlcontent = None
     results = []
     with open(file) as f:

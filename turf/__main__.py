@@ -27,28 +27,21 @@ from turf import entries_from_file, entries_from_search
 from turf.messages import msg, color
 
 
-# Global constants.
-# .............................................................................
-
-_DEFAULT_FETCH_COUNT = 100
-'''How many entries to get at one time from caltech.tind.io.'''
-
-
 # Main program.
 # ......................................................................
 
 @plac.annotations(
-    count    = ('how many results to try to get at one time',      'option', 'c'),
-    input    = ('read MARC XML from file instead of doing search', 'option', 'i'),
-    output   = ('write output in the given file',                  'option', 'o'),
-    quiet    = ('do not print any messages while working',         'flag',   'q'),
-    no_color = ('do not color-code terminal output',               'flag',   'C'),
-    version  = ('print version info and exit',                     'flag',   'V'),
+    input    = ('read MARC from file instead of searching tind.io', 'option', 'i'),
+    max      = ('read at most this many results (default: all)',    'option', 'm'),
+    output   = ('write output in the given file',                   'option', 'o'),
+    quiet    = ('do not print any messages while working',          'flag',   'q'),
+    no_color = ('do not color-code terminal output',                'flag',   'C'),
+    version  = ('print version info and exit',                      'flag',   'V'),
     search   = 'complete search URL (default: none)',
 )
 
-def main(count=_DEFAULT_FETCH_COUNT, input=None, output=None,
-         quiet=False, no_color=False, version=False, *search):
+def main(input=None, output=None, quiet=False, max=None,
+         no_color=False, version=False, *search):
     '''Look for caltech.tind.io records containing URLs and return updated URLs.
 If given a search query, it should be a complete search url as would be typed
 into a web browser.  If given a file, it should be in MARC XML format.
@@ -57,6 +50,9 @@ If given an output file, the results will be written to the file.  The format
 of the file will be deduced from the file name extension (.csv or .xlsx); in
 the absence of a file name extension, it will default to XLS format.  If not
 given an output file, the results will only be printed to the terminal.
+
+If given the -m option, it will only fetch and process that many results.
+(The default is to process all of them.)
 '''
 
     # Our defaults are to do things like color the output, which means the
@@ -77,8 +73,9 @@ given an output file, the results will only be printed to the terminal.
     if input and not input.endswith('.xml'):
         raise SystemExit(color('"{}" does not appear to be an XML file'
                                .format(input), 'error', colorize))
-    if count and not quiet:
-        msg('Will fetch results in batches of {}'.format(count), 'info', colorize)
+    if max and not quiet:
+        max = int(max)
+        msg('Will stop after getting {} records'.format(max), 'info', colorize)
     if not output and not quiet:
         msg("No output file specified; results won't be saved.", 'warn', colorize)
     elif not quiet:
@@ -98,17 +95,17 @@ given an output file, the results will only be printed to the terminal.
         if os.path.exists(input):
             if not quiet:
                 msg('Reading MARC XML from {}'.format(input), 'info', colorize)
-            results = entries_from_file(input, count, colorize, quiet)
+            results = entries_from_file(input, max, colorize, quiet)
         elif os.path.exists(os.path.join(os.getcwd(), file)):
             full_path = os.path.join(os.getcwd(), file)
             if not quiet:
                 msg('Reading MARC XML from {}'.format(full_path), 'info', colorize)
-            results = entries_from_file(input, count, colorize, quiet)
+            results = entries_from_file(input, max, colorize, quiet)
         else:
             raise SystemExit(color('Cannot find file "{}"'.format(input),
                                    'error', colorize))
     else:
-        results = entries_from_search(search[0], count, colorize, quiet)
+        results = entries_from_search(search[0], max, colorize, quiet)
 
     if not results:
         msg('No results returned.', 'info', colorize)
