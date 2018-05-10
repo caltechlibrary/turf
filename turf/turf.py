@@ -57,8 +57,8 @@ from turf.messages import color, msg
 if __debug__:
     import logging
     logging.basicConfig(level = logging.INFO)
-    logger = logging.getLogger('urlup')
-    def log(s, *other_args): logger.debug('urlup: ' + s.format(*other_args))
+    logger = logging.getLogger('turf')
+    def log(s, *other_args): logger.debug('turf: ' + s.format(*other_args))
 
 
 # Global constants.
@@ -95,20 +95,25 @@ def entries_from_search(search, max_records, colorize, quiet):
     search = substituted(search, '&of=', '&of=xm')
     # Remove any 'ot' field because it screws up results.
     search = substituted(search, '&ot=', '')
+    if __debug__: log('query string: {}', search)
     # Do a search & iterate over the results until we can't anymore.
     start = 1
     results = []
+    if not max_records:
+        max_records = 1000000           # FIXME
     while start > 0 and start < max_records:
+        if __debug__: log('getting records starting at {}', start)
         records = tind_records(search, start)
         if records:
+            if __debug__: log('processing next {} records', len(records))
             url_data = _entries_with_urls(records, colorize, quiet)
-            results.append(url_data)
+            results += url_data
             start += len(url_data)
             sleep(1)                    # Be nice to the server.
         else:
             start = -1
     if start > max_records:
-        msg('Stopped after {} records processed'.format(max_records), 'warn', colorize)
+        msg('Stopped after {} records processed'.format(len(results)), 'warn', colorize)
     return results
 
 
@@ -116,6 +121,7 @@ def entries_from_file(file, max_records, colorize, quiet):
     xmlcontent = None
     results = []
     with open(file) as f:
+        if __debug__: log('parsing XML file {}', file)
         xmlcontent = ElementTree.parse(f)
         results = _entries_with_urls(xmlcontent, colorize, quiet)
     return results
@@ -127,7 +133,7 @@ def _entries_with_urls(marcxml, colorize, quiet):
         tind_id = ''
         url = ''
         results_tuple = None
-        original_url = None
+        original_url = ''
         for child in e:
             if child.tag == '{http://www.loc.gov/MARC21/slim}controlfield':
                 if 'tag' in child.attrib and child.attrib['tag'] == '001':
@@ -142,14 +148,19 @@ def _entries_with_urls(marcxml, colorize, quiet):
                             results_tuple = updated_urls(eds_url(original_url), headers)
                             break
         if tind_id:
-            destination_url = results_tuple[1] if results_tuple else None
+            destination_url = results_tuple[1] if results_tuple else ''
             if len(e) <= 1:
                 msg('Empty result for {}'.format(tind_id), 'warn', colorize)
             if not quiet:
                 if results_tuple:
-                    msg('{}: {} => {}'.format(color(tind_id, 'info', colorize),
-                                              color(original_url, 'info', colorize),
-                                              color(destination_url, 'blue', colorize)))
+                    if results_tuple[3]: # Got an error?
+                        msg('{}: {} produced error {}'.format(color(tind_id, 'error', colorize),
+                                                              color(original_url, 'error', colorize),
+                                                              color(results_tuple[3], 'error', colorize)))
+                    else:
+                        msg('{}: {} => {}'.format(color(tind_id, 'info', colorize),
+                                                  color(original_url, 'info', colorize),
+                                                  color(destination_url, 'blue', colorize)))
                 else:
                     msg('{}'.format(tind_id), 'info', colorize)
             results.append([tind_id, original_url, destination_url])
@@ -163,15 +174,17 @@ def tind_records(query, start):
         conn = http.client.HTTPSConnection(parts.netloc, timeout=_NETWORK_TIMEOUT)
     else:
         conn = http.client.HTTPConnection(parts.netloc, timeout=_NETWORK_TIMEOUT)
+    if __debug__: log('connecting to {}', parts.netloc)
     conn.request("GET", query, {})
     response = conn.getresponse()
+    if __debug__: log('got response code {}', response.status)
     if response.status in [200, 202]:
         body = response.read().decode("utf-8")
         return ElementTree.fromstring(body)
     elif response.status in [301, 302, 303, 308]:
         # Redirection.  Start from the top with new URL.
         new_url = response.getheader('Location')
-        return tind_records(new_url)
+        return tind_records(new_url)    # FIXME
     else:
         return None
 
