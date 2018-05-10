@@ -1,0 +1,4 @@
+termcolor>=1.1.0
+plac>=0.9.6
+uritools>=2.1.0
+openpyxl>=2.5.0
