@@ -31,16 +31,17 @@ from turf.messages import msg, color
 # ......................................................................
 
 @plac.annotations(
-    input    = ('read MARC from file instead of searching tind.io', 'option', 'i'),
-    max      = ('read at most this many results (default: all)',    'option', 'm'),
-    output   = ('write output in the given file',                   'option', 'o'),
-    quiet    = ('do not print any messages while working',          'flag',   'q'),
-    no_color = ('do not color-code terminal output',                'flag',   'C'),
-    version  = ('print version info and exit',                      'flag',   'V'),
+    all      = ('write all entries, not only those with URLs',       'option', 'a'),
+    input    = ('read MARC from file instead of searching tind.io',  'option', 'i'),
+    max      = ('retrieve at most this many results (default: all)', 'option', 'm'),
+    output   = ('write output in the given file',                    'option', 'o'),
+    quiet    = ('do not print any messages while working',           'flag',   'q'),
+    no_color = ('do not color-code terminal output',                 'flag',   'C'),
+    version  = ('print version info and exit',                       'flag',   'V'),
     search   = 'complete search URL (default: none)',
 )
 
-def main(input=None, output=None, quiet=False, max=None,
+def main(all=False, input=None, output=None, quiet=False, max=None,
          no_color=False, version=False, *search):
     '''Look for caltech.tind.io records containing URLs and return updated URLs.
 If given a search query, it should be a complete search url as would be typed
@@ -114,7 +115,7 @@ If given the -m option, it will only fetch and process that many results.
         elif output:
             if not quiet:
                 msg('Writing CSV file {}'.format(output), 'info', colorize)
-            write_results(output, results)
+            write_results(output, results, all)
         if not quiet:
             msg('Done.', 'info', colorize)
 
@@ -129,7 +130,9 @@ def print_version():
     print('License: {}'.format(turf.__license__))
 
 
-def write_results(filename, results):
+def write_results(filename, results, all):
+    if not all:
+        results = only_with_urls(results)
     name, extension = os.path.splitext(filename)
     if extension.lower() == '.csv':
         write_csv(filename, results)
@@ -149,6 +152,10 @@ def write_xls(filename, results):
     from openpyxl.styles import Font
     from openpyxl.utils import get_column_letter
 
+    # Create some things we reuse below.
+    bold_font = Font(bold = True, underline = "single")
+    hyperlink_style = Font(underline='single', color='0563C1')
+
     # Create a sheet in a new workbook and give it a distinctive style.
     wb = openpyxl.Workbook()
     sheet = wb.active
@@ -157,7 +164,6 @@ def write_xls(filename, results):
 
     # Set the headings and format them a little bit.
     sheet.append(['TIND record id', 'Original URL', 'Updated URL'])
-    bold_font = Font(bold = True, underline = "single")
     for cell in sheet["1:1"]:
         cell.font = bold_font
 
@@ -169,9 +175,24 @@ def write_xls(filename, results):
     col_letter = get_column_letter(3)
     sheet.column_dimensions[col_letter].width = 100
     for row, data in enumerate(results, 2):
-        for col, value in enumerate(data, 0):
+        tind_id = data[0]
+        sheet.cell(row, 1).value = tind_id
+        sheet.cell(row, 1).hyperlink = tind_entry_link(tind_id)
+        sheet.cell(row, 1).font = hyperlink_style
+
+        for col, value in enumerate(data[1:], 1):
             sheet.cell(row, col + 1).value = data[col]
+            sheet.cell(row, col + 1).hyperlink = data[col]
+            sheet.cell(row, col + 1).font = hyperlink_style
     wb.save(filename = filename)
+
+
+def only_with_urls(results):
+    return [r for r in results if r[1]]
+
+
+def tind_entry_link(tind_id):
+    return 'https://caltech.TIND.io/search?ln=en&p={}&action_search=Search&sc=0&c=Caltech&of=hb'.format(tind_id)
 
 
 # Main entry point.
