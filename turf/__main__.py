@@ -192,7 +192,7 @@ def only_with_urls(results):
 
 
 def tind_entry_link(tind_id):
-    return 'https://caltech.TIND.io/search?ln=en&p={}&action_search=Search&sc=0&c=Caltech&of=hb'.format(tind_id)
+    return 'https://caltech.TIND.io/record/{}'.format(tind_id)
 
 
 # Main entry point.
