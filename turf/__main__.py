@@ -88,7 +88,7 @@ given an output file, the results will only be printed to the terminal.
         if extension and extension.lower() not in ['.csv', '.xlsx']:
             raise SystemExit(color('"{}" has an unrecognized file extension'.format(output),
                                    'error', colorize))
-        else:
+        elif not extension:
             msg('"{}" has no name extension; defaulting to xls'.format(output),
                 'warn', colorize)
 
