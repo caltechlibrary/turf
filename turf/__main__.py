@@ -91,33 +91,32 @@ If given the -m option, it will only fetch and process that many results.
 
     # Let's do this thing.
     results = []
-    if input:
-        if os.path.exists(input):
+    try:
+        if input:
+            file = None
+            if os.path.exists(input):
+                file = input
+            elif os.path.exists(os.path.join(os.getcwd(), input)):
+                file = os.path.join(os.getcwd(), input)
+            else:
+                raise SystemExit(color('Cannot find file "{}"'.format(input),
+                                       'error', colorize))
             if not quiet:
-                msg('Reading MARC XML from {}'.format(input), 'info', colorize)
-            results = entries_from_file(input, max, colorize, quiet)
-        elif os.path.exists(os.path.join(os.getcwd(), file)):
-            full_path = os.path.join(os.getcwd(), file)
-            if not quiet:
-                msg('Reading MARC XML from {}'.format(full_path), 'info', colorize)
-            results = entries_from_file(input, max, colorize, quiet)
+                msg('Reading MARC XML from {}'.format(file), 'info', colorize)
+            results = entries_from_file(file, max, colorize, quiet)
         else:
-            raise SystemExit(color('Cannot find file "{}"'.format(input),
-                                   'error', colorize))
-    else:
-        results = entries_from_search(search[0], max, colorize, quiet)
-
-    if not results:
-        msg('No results returned.', 'info', colorize)
-        sys.exit()
-
-    if output:
+            results = entries_from_search(search[0], max, colorize, quiet)
+    except Exception as e:
+        msg('Exception encountered: {}'.format(e))
+    finally:
+        if not results:
+            msg('No results returned.', 'warn', colorize)
+        elif output:
+            if not quiet:
+                msg('Writing CSV file {}'.format(output), 'info', colorize)
+            write_results(output, results)
         if not quiet:
-            msg('Writing CSV file {}'.format(output), 'info', colorize)
-        write_results(output, results)
-
-    if not quiet:
-        msg('Done.', 'info', colorize)
+            msg('Done.', 'info', colorize)
 
 
 # Miscellaneous utilities.
