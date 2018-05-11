@@ -31,29 +31,36 @@ from turf.messages import msg, color
 # ......................................................................
 
 @plac.annotations(
-    all      = ('write all entries, not only those with URLs',       'option', 'a'),
-    input    = ('read MARC from file instead of searching tind.io',  'option', 'i'),
-    max      = ('retrieve at most this many results (default: all)', 'option', 'm'),
-    output   = ('write output in the given file',                    'option', 'o'),
-    quiet    = ('do not print any messages while working',           'flag',   'q'),
-    no_color = ('do not color-code terminal output',                 'flag',   'C'),
-    version  = ('print version info and exit',                       'flag',   'V'),
-    search   = 'complete search URL (default: none)',
+    all       = ('write all entries, not only those with URLs',       'flag',   'a'),
+    input     = ('read MARC from file instead of searching tind.io',  'option', 'i'),
+    max       = ('retrieve at most this many results (default: all)', 'option', 'm'),
+    output    = ('write output to the given file',                    'option', 'o'),
+    quiet     = ('do not print any messages while working',           'flag',   'q'),
+    unchanged = ("write entries with URLs even if they're unchanged", 'flag',   'u'),
+    no_color  = ('do not color-code terminal output',                 'flag',   'C'),
+    version   = ('print version info and exit',                       'flag',   'V'),
+    search    = 'complete search URL (default: none)',
 )
 
 def main(all=False, input=None, output=None, quiet=False, max=None,
-         no_color=False, version=False, *search):
+         unchanged=False, no_color=False, version=False, *search):
     '''Look for caltech.tind.io records containing URLs and return updated URLs.
 If given a search query, it should be a complete search url as would be typed
 into a web browser.  If given a file, it should be in MARC XML format.
 
-If given an output file, the results will be written to the file.  The format
-of the file will be deduced from the file name extension (.csv or .xlsx); in
-the absence of a file name extension, it will default to XLS format.  If not
-given an output file, the results will only be printed to the terminal.
+By default, it writes out only entries that have URLs in MARC field 856, and
+then only those whose URLs are found to dereference to a different URL after
+following it.  If given the -a flag, it will write out all entries, even if
+they have no URLs.  If given the -u flag, it will write out entries with URLs
+even if the URLs are unchanged after dereferencing.
 
 If given the -m option, it will only fetch and process that many results.
 (The default is to process all of them.)
+
+If given an output file, the results will be written to the file.  The format
+of the file will be deduced from the file name extension (.csv or .xlsx).
+In the absence of a file name extension, it will default to XLS format.
+If not given an output file, the results will only be printed to the terminal.
 '''
 
     # Our defaults are to do things like color the output, which means the
@@ -104,9 +111,9 @@ If given the -m option, it will only fetch and process that many results.
                                        'error', colorize))
             if not quiet:
                 msg('Reading MARC XML from {}'.format(file), 'info', colorize)
-            results = entries_from_file(file, max, colorize, quiet)
+            results = entries_from_file(file, max, unchanged, colorize, quiet)
         else:
-            results = entries_from_search(search[0], max, colorize, quiet)
+            results = entries_from_search(search[0], max, unchanged, colorize, quiet)
     except Exception as e:
         msg('Exception encountered: {}'.format(e))
     finally:
