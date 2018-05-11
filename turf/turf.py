@@ -7,6 +7,7 @@ import plac
 import sys
 from   time import time, sleep
 from   urllib.parse import urlsplit
+import urllib.request
 from   xml.etree import ElementTree
 
 try:
@@ -58,7 +59,7 @@ _EDS_ROOT_URL = 'http://web.b.ebscohost.com/pfi/detail/detail?vid=4&bdata=JnNjb3
 # field 001 is the tind record number
 # field 856 is a URL, if there is one
 
-def entries_from_search(search, max_records, colorize, quiet):
+def entries_from_search(search, max_records, write_unchanged, colorize, quiet):
     # Get results in batches of a certain number of records.
     if max_records and max_records < _FETCH_COUNT:
         search = substituted(search, '&rg=', '&rg=' + str(max_records))
@@ -79,7 +80,7 @@ def entries_from_search(search, max_records, colorize, quiet):
         records = tind_records(search, start)
         if records:
             if __debug__: log('processing next {} records', len(records))
-            url_data = _entries_with_urls(records, colorize, quiet)
+            url_data = _entries_with_urls(records, write_unchanged, colorize, quiet)
             results += url_data
             start += len(url_data)
             sleep(1)                    # Be nice to the server.
@@ -90,27 +91,26 @@ def entries_from_search(search, max_records, colorize, quiet):
     return results
 
 
-def entries_from_file(file, max_records, colorize, quiet):
+def entries_from_file(file, max_records, write_unchanged, colorize, quiet):
     xmlcontent = None
     results = []
     with open(file) as f:
         if __debug__: log('parsing XML file {}', file)
         xmlcontent = ElementTree.parse(f)
-        results = _entries_with_urls(xmlcontent, colorize, quiet)
+        results = _entries_with_urls(xmlcontent, write_unchanged, colorize, quiet)
     return results
 
 
-def _entries_with_urls(marcxml, colorize, quiet):
+def _entries_with_urls(marcxml, write_unchanged, colorize, quiet):
     results = []
     for e in marcxml.findall('{http://www.loc.gov/MARC21/slim}record'):
-        tind_id = ''
-        url = ''
-        results_tuple = None
+        id = ''
+        url_data = None
         original_url = ''
         for child in e:
             if child.tag == '{http://www.loc.gov/MARC21/slim}controlfield':
                 if 'tag' in child.attrib and child.attrib['tag'] == '001':
-                    tind_id = child.text.strip()
+                    id = child.text.strip()
                     continue
             if child.tag == '{http://www.loc.gov/MARC21/slim}datafield':
                 if 'tag' in child.attrib and child.attrib['tag'] == '856':
@@ -118,25 +118,30 @@ def _entries_with_urls(marcxml, colorize, quiet):
                         if 'code' in elem.attrib and elem.attrib['code'] == 'u':
                             original_url = elem.text.strip()
                             headers = { 'Cookie': _SESSION_COOKIE }
-                            results_tuple = updated_urls(eds_url(original_url), headers)
+                            url_data = updated_urls(eds_url(original_url), headers)
                             break
-        if tind_id:
-            destination_url = results_tuple[1] if results_tuple else ''
+        if id:
             if len(e) <= 1:
-                msg('Empty result for {}'.format(tind_id), 'warn', colorize)
+                msg('Empty result for {}'.format(id), 'warn', colorize)
             if not quiet:
-                if results_tuple:
-                    if results_tuple[3]: # Got an error?
-                        msg('{}: {} produced error {}'.format(color(tind_id, 'error', colorize),
-                                                              color(original_url, 'error', colorize),
-                                                              color(results_tuple[3], 'error', colorize)))
-                    else:
-                        msg('{}: {} => {}'.format(color(tind_id, 'info', colorize),
+                if url_data and url_data.error:
+                    msg('{}: {} produced error: {}'.format(color(id, 'error', colorize),
+                                                           color(original_url, 'error', colorize),
+                                                           color(url_data.error, 'error', colorize)))
+                elif url_data:
+                    if url_data.final != original_url or write_unchanged:
+                        msg('{}: {} => {}'.format(color(id, 'info', colorize),
                                                   color(original_url, 'info', colorize),
-                                                  color(destination_url, 'blue', colorize)))
+                                                  color(url_data.final, 'blue', colorize)))
                 else:
-                    msg('{}'.format(tind_id), 'info', colorize)
-            results.append([tind_id, original_url, destination_url])
+                    msg('{}'.format(id), 'info', colorize)
+            if url_data:
+                if url_data.error:
+                    results.append([id, original_url, 'Error: ' + str(url_data.error)])
+                elif url_data.final != original_url or write_unchanged:
+                    results.append([id, original_url, url_data.final])
+            else:
+                results.append([id, original_url, ''])
     return results
 
 
@@ -155,9 +160,7 @@ def tind_records(query, start):
         body = response.read().decode("utf-8")
         return ElementTree.fromstring(body)
     elif response.status in [301, 302, 303, 308]:
-        # Redirection.  Start from the top with new URL.
-        new_url = response.getheader('Location')
-        return tind_records(new_url)    # FIXME
+        import pdb; pdb.set_trace()
     else:
         return None
 
