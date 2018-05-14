@@ -16,6 +16,7 @@ open-source software.  Please see the file "LICENSE" for more information.
 
 import http.client
 from   http.client import responses as http_responses
+from   itertools import zip_longest
 import os
 import plac
 import sys
@@ -116,11 +117,19 @@ def entries_from_file(file, max_records, write_unchanged, colorize, quiet):
 
 
 def _entries_with_urls(marcxml, write_unchanged, colorize, quiet):
+    # Returns a list of tuples. The tuples are each of the following form:
+    #   (id, [UrlData, UrlData, ...])
+    # where "UrlData" is the UrlData structure retured by urlup for each
+    # URL found in field 856 (if any are found) for the MARC XML record.
+
     results = []
     for e in marcxml.findall('{http://www.loc.gov/MARC21/slim}record'):
         id = ''
-        url_data = None
-        original_url = ''
+        final_urls = []
+        original_urls = []
+        # Look through this record, searching for field 856.
+        # If found, gather up all URLs (datafield code 'u') into original_urls
+        # (massaging them using function eds_url() while we're at it).
         for child in e:
             if child.tag == '{http://www.loc.gov/MARC21/slim}controlfield':
                 if 'tag' in child.attrib and child.attrib['tag'] == '001':
@@ -130,32 +139,28 @@ def _entries_with_urls(marcxml, write_unchanged, colorize, quiet):
                 if 'tag' in child.attrib and child.attrib['tag'] == '856':
                     for elem in child:
                         if 'code' in elem.attrib and elem.attrib['code'] == 'u':
-                            original_url = elem.text.strip()
-                            headers = { 'Cookie': _SESSION_COOKIE }
-                            url_data = updated_urls(eds_url(original_url), headers)
-                            break
-        if id:
-            if len(e) <= 1:
-                msg('Empty result for {}'.format(id), 'warn', colorize)
-            if not quiet:
-                if url_data and url_data.error:
-                    msg('{}: {} produced error: {}'.format(color(id, 'error', colorize),
-                                                           color(original_url, 'error', colorize),
-                                                           color(url_data.error, 'error', colorize)))
-                elif url_data:
-                    if url_data.final != original_url or write_unchanged:
-                        msg('{}: {} => {}'.format(color(id, 'info', colorize),
-                                                  color(original_url, 'info', colorize),
-                                                  color(url_data.final, 'blue', colorize)))
-                else:
-                    msg('{}'.format(id), 'info', colorize)
-            if url_data:
-                if url_data.error:
-                    results.append([id, original_url, 'Error: ' + str(url_data.error)])
-                elif url_data.final != original_url or write_unchanged:
-                    results.append([id, original_url, url_data.final])
+                            extracted_url = eds_url(elem.text.strip())
+                            original_urls.append(extracted_url)
+        if not id:
+            continue
+
+        headers = { 'Cookie': _SESSION_COOKIE }
+        url_data = updated_urls(original_urls, headers)
+
+        results.append((id, url_data))
+        if not quiet and len(original_urls) <= 0:
+            msg('No URLs in record for {}'.format(id), 'warn', colorize)
+            continue
+        msgs = []
+        for data in url_data:
+            if data.error:
+                msgs += ['{} produced error: {}'.format(color(data.original, 'error', colorize),
+                                                        color(data.error, 'error', colorize))]
             else:
-                results.append([id, original_url, ''])
+                msgs += ['{} => {}'.format(color(data.original, 'info', colorize),
+                                           color(data.final, 'blue', colorize))]
+        if not quiet:
+            msg(id + ': ' + ('\n  ' + ' '*len(id)).join(msgs))
     return results
 
 
