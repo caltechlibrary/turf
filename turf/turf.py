@@ -1,4 +1,18 @@
-#!/usr/bin/env python3
+'''
+turf.py: main code for Turf, the Caltech library TIND.io URL Fixer
+
+Authors
+-------
+
+Michael Hucka <mhucka@caltech.edu> -- Caltech Library
+
+Copyright
+---------
+
+Copyright (c) 2018 by the California Institute of Technology.  This code is
+open-source software.  Please see the file "LICENSE" for more information.
+'''
+
 
 import http.client
 from   http.client import responses as http_responses
