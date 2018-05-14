@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<collection xmlns="http://www.loc.gov/MARC21/slim">
+  <record>
+    <controlfield tag="001">682849</controlfield>
+    <controlfield tag="000">02588cam\a2200481Ia\45\0</controlfield>
+    <controlfield tag="005">20170207155453.0</controlfield>
+    <controlfield tag="008">060616s2006\\\\gw\\\\\\\b\\\\001\0\eng\d</controlfield>
+    <datafield tag="020" ind1=" " ind2=" ">
+      <subfield code="a">3540309918 (v. 1 : pbk.)</subfield>
+    </datafield>
+    <datafield tag="020" ind1=" " ind2=" ">
+      <subfield code="a">3540309926 (v. 2 : pbk.)</subfield>
+    </datafield>
+    <datafield tag="020" ind1=" " ind2=" ">
+      <subfield code="a">3540309934 (v. 3 : pbk.)</subfield>
+    </datafield>
+    <datafield tag="035" ind1=" " ind2=" ">
+      <subfield code="a">.b13956814</subfield>
+    </datafield>
+    <datafield tag="035" ind1=" " ind2=" ">
+      <subfield code="a">(OCoLC)70132630</subfield>
+    </datafield>
+    <datafield tag="040" ind1=" " ind2=" ">
+      <subfield code="a">OHX</subfield>
+      <subfield code="c">OHX</subfield>
+      <subfield code="d">GUA</subfield>
+      <subfield code="d">UKM</subfield>
+      <subfield code="d">IXA</subfield>
+      <subfield code="d">BAKER</subfield>
+      <subfield code="d">NLGGC</subfield>
+      <subfield code="d">YDXCP</subfield>
+      <subfield code="d">OCLCQ</subfield>
+    </datafield>
+    <datafield tag="049" ind1=" " ind2=" ">
+      <subfield code="a">CIT6</subfield>
+      <subfield code="a">CIT5</subfield>
+    </datafield>
+    <datafield tag="090" ind1=" " ind2=" ">
+      <subfield code="a">QC174.85.O6</subfield>
+      <subfield code="b">O64</subfield>
+    </datafield>
+    <datafield tag="245" ind1="0" ind2="0">
+      <subfield code="a">Open quantum systems /</subfield>
+      <subfield code="c">S. Attal, A. Joye, C.-A. Pillet (eds.)</subfield>
+    </datafield>
+    <datafield tag="260" ind1=" " ind2=" ">
+      <subfield code="a">Berlin ;</subfield>
+      <subfield code="a">New York :</subfield>
+      <subfield code="b">Springer,</subfield>
+      <subfield code="c">c2006</subfield>
+    </datafield>
+    <datafield tag="300" ind1=" " ind2=" ">
+      <subfield code="a">3 v. ;</subfield>
+      <subfield code="c">24 cm</subfield>
+    </datafield>
+    <datafield tag="490" ind1="1" ind2=" ">
+      <subfield code="a">Lecture notes in mathematics,</subfield>
+      <subfield code="v">1880-1882</subfield>
+      <subfield code="x">0075-8434 ;</subfield>
+    </datafield>
+    <datafield tag="504" ind1=" " ind2=" ">
+      <subfield code="a">Includes bibliographical references and index</subfield>
+    </datafield>
+    <datafield tag="505" ind1="0" ind2=" ">
+      <subfield code="a">[v. 1]. The Hamiltonian approach -- [v. 2]. The Markovian approach -- [v. 3]. Recent developments</subfield>
+    </datafield>
+    <datafield tag="538" ind1=" " ind2=" ">
+      <subfield code="a">MODE OF ACCESS: World Wide Web: http://www.springerlink.com/openurl.asp?genre=issue&amp;issn=0075-8434&amp;volume=1880 (v. 1); http://www.springerlink.com/openurl.asp?genre=issue&amp;issn=0075-8434&amp;volume=1881 (v. 2); http://www.springerlink.com/openurl.asp?genre=issue&amp;issn=0075-8434&amp;volume=1882 (v. 3)</subfield>
+    </datafield>
+    <datafield tag="650" ind1=" " ind2="0">
+      <subfield code="a">Quantum systems</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2="0">
+      <subfield code="a">Electronic books</subfield>
+    </datafield>
+    <datafield tag="690" ind1=" " ind2=" ">
+      <subfield code="a">WWW-Books</subfield>
+    </datafield>
+    <datafield tag="690" ind1=" " ind2=" ">
+      <subfield code="a">WWW-Physics E-materials</subfield>
+    </datafield>
+    <datafield tag="700" ind1="1" ind2=" ">
+      <subfield code="a">Attal, S.</subfield>
+      <subfield code="q">(Stéphane)</subfield>
+    </datafield>
+    <datafield tag="700" ind1="1" ind2=" ">
+      <subfield code="a">Joye, Alain</subfield>
+    </datafield>
+    <datafield tag="700" ind1="1" ind2=" ">
+      <subfield code="a">Pillet, C.-A.</subfield>
+      <subfield code="q">(Claude-Alain)</subfield>
+    </datafield>
+    <datafield tag="710" ind1="2" ind2=" ">
+      <subfield code="a">SpringerLink (Online service)</subfield>
+    </datafield>
+    <datafield tag="740" ind1="0" ind2="2">
+      <subfield code="a">Hamiltonian approach</subfield>
+    </datafield>
+    <datafield tag="740" ind1="0" ind2="2">
+      <subfield code="a">Markovian approach</subfield>
+    </datafield>
+    <datafield tag="740" ind1="0" ind2="2">
+      <subfield code="a">Recent developments</subfield>
+    </datafield>
+    <datafield tag="830" ind1=" " ind2="0">
+      <subfield code="a">Lecture notes in mathematics ;</subfield>
+      <subfield code="v">1880</subfield>
+    </datafield>
+    <datafield tag="830" ind1=" " ind2="0">
+      <subfield code="a">Lecture notes in mathematics ;</subfield>
+      <subfield code="v">1881</subfield>
+    </datafield>
+    <datafield tag="830" ind1=" " ind2="0">
+      <subfield code="a">Lecture notes in mathematics ;</subfield>
+      <subfield code="v">1882</subfield>
+    </datafield>
+    <datafield tag="856" ind1="4" ind2="1">
+      <subfield code="u">http://www.springerlink.com/openurl.asp?genre=issue&amp;issn=0075-8434&amp;volume=1880</subfield>
+      <subfield code="z">&lt;a href="http://www.springerlink.com/openurl.asp?genre=issue&amp;issn=0075-8434&amp;volume=1880" TARGET="_blank">Open quantum systems, v. 1 [electronic book]&lt;/a></subfield>
+    </datafield>
+    <datafield tag="856" ind1="4" ind2="1">
+      <subfield code="u">http://www.springerlink.com/openurl.asp?genre=issue&amp;issn=0075-8434&amp;volume=1881</subfield>
+      <subfield code="z">&lt;a href="http://www.springerlink.com/openurl.asp?genre=issue&amp;issn=0075-8434&amp;volume=1881" TARGET="_blank">Open quantum systems, v. 2 [electronic book]&lt;/a></subfield>
+    </datafield>
+    <datafield tag="856" ind1="4" ind2="1">
+      <subfield code="u">http://www.springerlink.com/openurl.asp?genre=issue&amp;issn=0075-8434&amp;volume=1882</subfield>
+      <subfield code="z">&lt;a href="http://www.springerlink.com/openurl.asp?genre=issue&amp;issn=0075-8434&amp;volume=1882" TARGET="_blank">Open quantum systems, v. 3 [electronic book]&lt;/a></subfield>
+    </datafield>
+    <datafield tag="907" ind1=" " ind2=" ">
+      <subfield code="a">.b13956814</subfield>
+      <subfield code="b">150825</subfield>
+      <subfield code="c">061026</subfield>
+    </datafield>
+    <datafield tag="909" ind1="C" ind2="O">
+      <subfield code="o">oai:caltech.tind.io:682849</subfield>
+      <subfield code="p">caltech:bibliographic</subfield>
+    </datafield>
+    <datafield tag="948" ind1=" " ind2=" ">
+      <subfield code="a">car</subfield>
+    </datafield>
+    <datafield tag="980" ind1=" " ind2=" ">
+      <subfield code="a">BIB</subfield>
+    </datafield>
+    <datafield tag="998" ind1=" " ind2=" ">
+      <subfield code="a">sfl</subfield>
+      <subfield code="a">www</subfield>
+    </datafield>
+    <datafield tag="998" ind1=" " ind2=" ">
+      <subfield code="a">sfl</subfield>
+      <subfield code="a">www</subfield>
+      <subfield code="b">091204</subfield>
+      <subfield code="c">a</subfield>
+      <subfield code="d">m</subfield>
+      <subfield code="e">-</subfield>
+      <subfield code="f">eng</subfield>
+      <subfield code="g">gw </subfield>
+      <subfield code="h">0</subfield>
+      <subfield code="i">4</subfield>
+    </datafield>
+  </record>
+
+  
+</collection>
