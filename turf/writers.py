@@ -63,7 +63,7 @@ def write_xls(filename, results, num_urls):
     from openpyxl.utils import get_column_letter
 
     # Create some things we reuse below.
-    bold_font = Font(bold = True, underline = "single")
+    bold_style = Font(bold = True, underline = "single")
     hyperlink_style = Font(underline='single', color='0563C1')
     error_style = Font(color='aa2222')
 
@@ -77,14 +77,14 @@ def write_xls(filename, results, num_urls):
     header_row = ['TIND record id'] + ['Original URL', 'Final URL']*num_urls
     sheet.append(header_row)
     for cell in sheet["1:1"]:
-        cell.font = bold_font
+        cell.font = bold_style
 
     # Set the widths of the different columngs to something more convenient.
-    col_letter = get_column_letter(1)
-    sheet.column_dimensions[col_letter].width = 15
+    column = get_column_letter(1)
+    sheet.column_dimensions[column].width = 15
     for idx in range(2, num_urls*2 + 2):
-        col_letter = get_column_letter(idx)
-        sheet.column_dimensions[col_letter].width = 80
+        column = get_column_letter(idx)
+        sheet.column_dimensions[column].width = 80
 
     for row, data in enumerate(results, 2):
         tind_id = data[0]
