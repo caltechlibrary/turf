@@ -176,9 +176,8 @@ def tind_records(query, start):
         body = response.read().decode("utf-8")
         return ElementTree.fromstring(body)
     elif response.status in [301, 302, 303, 308]:
-        import pdb; pdb.set_trace()
-    else:
-        return None
+        msg('server returned code {} -- unable to continue'.format(response.status))
+    return None
 
 
 # Miscellaneous utilities.
