@@ -54,9 +54,7 @@ _FETCH_COUNT = 100
 '''How many entries to get at one time from caltech.tind.io.'''
 
 _NETWORK_TIMEOUT = 15
-'''
-How long to wait on a network connection attempt.
-'''
+'''How long to wait on a network connection attempt.'''
 
 # This is a cookie I extracted from a past session, and it seems to work to
 # keep reusing it, which makes me think their service only checks for the
@@ -74,7 +72,7 @@ _EDS_ROOT_URL = 'http://web.b.ebscohost.com/pfi/detail/detail?vid=4&bdata=JnNjb3
 # field 001 is the tind record number
 # field 856 is a URL, if there is one
 
-def entries_from_search(search, max_records, write_unchanged, colorize, quiet):
+def entries_from_search(search, max_records, start_index, write_unchanged, colorize, quiet):
     # Get results in batches of a certain number of records.
     if max_records and max_records < _FETCH_COUNT:
         search = substituted(search, '&rg=', '&rg=' + str(max_records))
@@ -85,28 +83,27 @@ def entries_from_search(search, max_records, write_unchanged, colorize, quiet):
     # Remove any 'ot' field because it screws up results.
     search = substituted(search, '&ot=', '')
     if __debug__: log('query string: {}', search)
-    # Do a search & iterate over the results until we can't anymore.
-    start = 1
     results = []
-    if not max_records:
-        max_records = 1000000           # FIXME
-    while start > 0 and start < max_records:
-        if __debug__: log('getting records starting at {}', start)
-        records = tind_records(search, start)
+    current = start_index
+    if __debug__: log('getting records starting at {}', start_index)
+    while current > 0:
+        if max_records and current > max_records:
+            break
+        records = tind_records(search, current)
         if records:
             if __debug__: log('processing next {} records', len(records))
             url_data = _entries_with_urls(records, write_unchanged, colorize, quiet)
             results += url_data
-            start += len(url_data)
+            current += len(url_data)
             sleep(1)                    # Be nice to the server.
         else:
-            start = -1
-    if start > max_records:
+            current = -1
+    if max_records and current > max_records:
         msg('Stopped after {} records processed'.format(len(results)), 'warn', colorize)
     return results
 
 
-def entries_from_file(file, max_records, write_unchanged, colorize, quiet):
+def entries_from_file(file, max_records, start_index, write_unchanged, colorize, quiet):
     xmlcontent = None
     results = []
     with open(file) as f:

@@ -37,6 +37,7 @@ from turf.writers import write_results
     max       = ('retrieve at most this many results (default: all)', 'option', 'm'),
     output    = ('write output to the given file',                    'option', 'o'),
     quiet     = ('do not print any messages while working',           'flag',   'q'),
+    start     = ("start with Nth record (default: start at 1)",       'option', 's'),
     unchanged = ("write entries with URLs even if they're unchanged", 'flag',   'u'),
     no_color  = ('do not color-code terminal output',                 'flag',   'C'),
     version   = ('print version info and exit',                       'flag',   'V'),
@@ -44,7 +45,7 @@ from turf.writers import write_results
 )
 
 def main(all=False, input=None, output=None, quiet=False, max=None,
-         unchanged=False, no_color=False, version=False, *search):
+         start=1, unchanged=False, no_color=False, version=False, *search):
     '''Look for caltech.tind.io records containing URLs and return updated URLs.
 If given a search query, it should be a complete search url as would be typed
 into a web browser.  If given a file, it should be in MARC XML format.
@@ -112,9 +113,9 @@ If not given an output file, the results will only be printed to the terminal.
                                        'error', colorize))
             if not quiet:
                 msg('Reading MARC XML from {}'.format(file), 'info', colorize)
-            results = entries_from_file(file, max, unchanged, colorize, quiet)
+            results = entries_from_file(file, max, start, unchanged, colorize, quiet)
         else:
-            results = entries_from_search(search[0], max, unchanged, colorize, quiet)
+            results = entries_from_search(search[0], max, start, unchanged, colorize, quiet)
     except Exception as e:
         msg('Exception encountered: {}'.format(e))
     finally:
