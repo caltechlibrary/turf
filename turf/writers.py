@@ -16,6 +16,10 @@ file "LICENSE" for more information.
 
 import csv
 import os
+import openpyxl
+from   openpyxl.styles import Font
+from   openpyxl.utils import get_column_letter
+from   openpyxl.worksheet.write_only import WriteOnlyCell
 import sys
 
 try:
@@ -79,6 +83,7 @@ def write_csv(filename, results, all):
                     row.append(url_data.final or '')
             if data_list or all:
                 csvwriter.writerow(row)
+                file.flush()
     except KeyboardInterrupt:
         msg('Interrupted -- closing "{}" and exiting'.format(filename))
     except Exception:
@@ -88,26 +93,16 @@ def write_csv(filename, results, all):
 
 
 def write_xls(filename, results, all):
-    import openpyxl
-    from openpyxl.styles import Font
-    from openpyxl.utils import get_column_letter
-
     # Create some things we reuse below.
     bold_style = Font(bold = True, underline = "single")
     hyperlink_style = Font(underline='single', color='0563C1')
     error_style = Font(color='aa2222')
 
     # Create a sheet in a new workbook and give it a distinctive style.
-    wb = openpyxl.Workbook()
-    sheet = wb.active
+    wb = openpyxl.Workbook(write_only = True)
+    sheet = wb.create_sheet()
     sheet.title = 'Results'
     sheet.sheet_properties.tabColor = 'f7ba0b'
-
-    # Set the headings and format them a little bit.
-    header_row = ['TIND record id'] + ['Original URL', 'Final URL']*_NUM_URLS
-    sheet.append(header_row)
-    for cell in sheet["1:1"]:
-        cell.font = bold_style
 
     # Set the widths of the different columngs to something more convenient.
     column = get_column_letter(1)
@@ -116,29 +111,50 @@ def write_xls(filename, results, all):
         column = get_column_letter(idx)
         sheet.column_dimensions[column].width = 80
 
+    # Set the headings and format them a little bit.
+    cell1 = WriteOnlyCell(sheet, value = 'TIND Identifier')
+    cell1.font = bold_style
+    row = [cell1]
+    for i in range(1, _NUM_URLS + 1):
+        cell = WriteOnlyCell(sheet, value = 'Original URL #{}'.format(i))
+        cell.font = bold_style
+        row.append(cell)
+        cell = WriteOnlyCell(sheet, value = 'Final URL #{}'.format(i))
+        cell.font = bold_style
+        row.append(cell)
+
+    # Write the header row.
+    sheet.append(row)
+
+    # Now create the data rows.
     try:
         for row, data in enumerate(results, 2):
             if __debug__: log('writing row {}'.format(row))
             tind_id = data[0]
             data_list = data[1]
+
             if data_list or all:
-                sheet.cell(row, 1).value = tind_id
-                sheet.cell(row, 1).hyperlink = tind_entry_link(tind_id)
-                sheet.cell(row, 1).font = hyperlink_style
-            col = 2
+                cell = WriteOnlyCell(sheet, value = tind_id)
+                cell.hyperlink = tind_entry_link(tind_id)
+                cell.font = hyperlink_style
+            else:
+                continue
+
+            row = [cell]
             for url_data in data_list:
-                sheet.cell(row, col).value = url_data.original
-                sheet.cell(row, col).hyperlink = url_data.original
-                sheet.cell(row, col).font = hyperlink_style
-                col += 1
+                cell = WriteOnlyCell(sheet, value = url_data.original)
+                cell.hyperlink = url_data.original
+                cell.font = hyperlink_style
+                row.append(cell)
                 if url_data.error:
-                    sheet.cell(row, col).value = '(error: {})'.format(url_data.error)
-                    sheet.cell(row, col).font = error_style
+                    cell = WriteOnlyCell(sheet, value = '(error: {})'.format(url_data.error))
+                    cell.font = error_style
                 else:
-                    sheet.cell(row, col).value = url_data.final
-                    sheet.cell(row, col).hyperlink = (url_data.final or '')
-                    sheet.cell(row, col).font = hyperlink_style
-                col += 1
+                    cell = WriteOnlyCell(sheet, value = url_data.final)
+                    cell.hyperlink = (url_data.final or '')
+                    cell.font = hyperlink_style
+                row.append(cell)
+            sheet.append(row)
     except KeyboardInterrupt:
         msg('Interrupted -- closing "{}" and exiting'.format(filename))
     except Exception:
