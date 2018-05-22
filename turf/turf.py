@@ -88,8 +88,9 @@ def entries_from_search(search, max_records, start_index, include_unchanged,
     if __debug__: log('query string: {}', search)
     current = start_index
     if __debug__: log('getting records starting at {}', start_index)
+    stop = start_index + (max_records or 0)
     while current > 0:
-        if max_records and current > max_records:
+        if max_records and current > stop:
             break
         try:
             marcxml = tind_records(search, current)
@@ -103,9 +104,9 @@ def entries_from_search(search, max_records, start_index, include_unchanged,
                 if __debug__: log('no records received')
                 current = -1
         except KeyboardInterrupt:
+            if max_records and current > stop:
+                msg('Stopped', 'warn', colorize)
             current = -1
-            if max_records and current > max_records:
-                msg('Stopped after {} records'.format(current), 'warn', colorize)
             raise
 
 
