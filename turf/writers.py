@@ -67,7 +67,12 @@ def write_results(filename, results, all):
 
 def write_csv(filename, results, all):
     file = open(filename, 'w', newline='')
-    file.write('TIND record id' + ',Original URL,Final URL'*_NUM_URLS + '\n')
+
+    # Write the header row.
+    text = 'TIND record id'
+    for i in range(1, _NUM_URLS + 1):
+        text += ',Original URL {},Final URL {}'.format(i, i)
+    file.write(text + '\n')
     csvwriter = csv.writer(file, delimiter=',')
     try:
         for data in results:
