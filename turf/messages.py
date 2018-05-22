@@ -52,7 +52,7 @@ def color(text, flags = None, colorize = True):
         else:
             return text
     elif prefix:
-        return prefix + ': ' + text
+        return prefix + ': ' + str(text)
     else:
         return text
 
