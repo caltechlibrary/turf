@@ -67,15 +67,18 @@ def write_csv(filename, results, all):
     csvwriter = csv.writer(file, delimiter=',')
     try:
         for data in results:
-            row = [data[0]]
-            if __debug__: log('writing row for {}'.format(data[0]))
-            for url_data in data[1]:
+            tind_id = data[0]
+            data_list = data[1]
+            if __debug__: log('writing row for {}'.format(tind_id))
+            row = [tind_id]
+            for url_data in data_list:
                 row.append(url_data.original)
                 if url_data.error:
                     row.append('(error: {})'.format(url_data.error))
                 else:
                     row.append(url_data.final or '')
-            csvwriter.writerow(row)
+            if data_list or all:
+                csvwriter.writerow(row)
     except KeyboardInterrupt:
         msg('Interrupted -- closing "{}" and exiting'.format(filename))
     except Exception:
@@ -117,12 +120,13 @@ def write_xls(filename, results, all):
         for row, data in enumerate(results, 2):
             if __debug__: log('writing row {}'.format(row))
             tind_id = data[0]
-            sheet.cell(row, 1).value = tind_id
-            sheet.cell(row, 1).hyperlink = tind_entry_link(tind_id)
-            sheet.cell(row, 1).font = hyperlink_style
-
+            data_list = data[1]
+            if data_list or all:
+                sheet.cell(row, 1).value = tind_id
+                sheet.cell(row, 1).hyperlink = tind_entry_link(tind_id)
+                sheet.cell(row, 1).font = hyperlink_style
             col = 2
-            for url_data in data[1]:
+            for url_data in data_list:
                 sheet.cell(row, col).value = url_data.original
                 sheet.cell(row, col).hyperlink = url_data.original
                 sheet.cell(row, col).font = hyperlink_style
@@ -141,7 +145,6 @@ def write_xls(filename, results, all):
         raise
     finally:
         wb.save(filename = filename)
-
 
 
 # Miscellaneous utilities.
