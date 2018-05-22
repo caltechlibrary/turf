@@ -90,6 +90,10 @@ If not given an output file, the results will only be printed to the terminal.
         msg("No output file specified; results won't be saved.", 'warn', colorize)
     elif not quiet:
         msg('Output will be written to {}'.format(output), 'info', colorize)
+        if all:
+            msg('Writing all results, including those without URLs', 'info', colorize)
+        else:
+            msg('Writing only relevant results', 'info', colorize)
     if output:
         name, extension = os.path.splitext(output)
         if extension and extension.lower() not in ['.csv', '.xlsx']:
