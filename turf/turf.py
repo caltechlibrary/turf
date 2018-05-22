@@ -31,7 +31,7 @@ try:
 except:
     sys.path.append('../..')
 
-from urlup import updated_urls
+from urlup import updated_urls, UrlData
 
 import turf
 from turf.messages import color, msg
@@ -50,8 +50,10 @@ if __debug__:
 # Global constants.
 # .............................................................................
 
-_FETCH_COUNT = 100
-'''How many entries to get at one time from caltech.tind.io.'''
+_FETCH_COUNT = 20
+'''How many entries to get at one time from caltech.tind.io.  Smaller batches
+make it possible to write out results more reliably as we run, at the cost of
+some speed.'''
 
 _NETWORK_TIMEOUT = 15
 '''How long to wait on a network connection attempt.'''
@@ -72,7 +74,8 @@ _EDS_ROOT_URL = 'http://web.b.ebscohost.com/pfi/detail/detail?vid=4&bdata=JnNjb3
 # field 001 is the tind record number
 # field 856 is a URL, if there is one
 
-def entries_from_search(search, max_records, start_index, write_unchanged, colorize, quiet):
+def entries_from_search(search, max_records, start_index, include_unchanged,
+                        colorize, quiet):
     # Get results in batches of a certain number of records.
     if max_records and max_records < _FETCH_COUNT:
         search = substituted(search, '&rg=', '&rg=' + str(max_records))
@@ -83,43 +86,46 @@ def entries_from_search(search, max_records, start_index, write_unchanged, color
     # Remove any 'ot' field because it screws up results.
     search = substituted(search, '&ot=', '')
     if __debug__: log('query string: {}', search)
-    results = []
     current = start_index
     if __debug__: log('getting records starting at {}', start_index)
     while current > 0:
         if max_records and current > max_records:
             break
-        records = tind_records(search, current)
-        if records:
-            if __debug__: log('processing next {} records', len(records))
-            url_data = _entries_with_urls(records, write_unchanged, colorize, quiet)
-            results += url_data
-            current += len(url_data)
-            sleep(1)                    # Be nice to the server.
-        else:
+        try:
+            marcxml = tind_records(search, current)
+            if marcxml:
+                if __debug__: log('processing {} records', len(marcxml))
+                for item in _entries(marcxml, include_unchanged, colorize, quiet):
+                    current += 1
+                    yield item
+                sleep(1)                    # Be nice to the server.
+            else:
+                if __debug__: log('no records received')
+                current = -1
+        except KeyboardInterrupt:
             current = -1
-    if max_records and current > max_records:
-        msg('Stopped after {} records processed'.format(len(results)), 'warn', colorize)
-    return results
+            if max_records and current > max_records:
+                msg('Stopped after {} records'.format(current), 'warn', colorize)
+            raise
 
 
-def entries_from_file(file, max_records, start_index, write_unchanged, colorize, quiet):
+def entries_from_file(file, max_records, start_index, include_unchanged, colorize, quiet):
+    # FIXME
     xmlcontent = None
     results = []
     with open(file) as f:
         if __debug__: log('parsing XML file {}', file)
         xmlcontent = ElementTree.parse(f)
-        results = _entries_with_urls(xmlcontent, write_unchanged, colorize, quiet)
+        results = _entries(xmlcontent, include_unchanged, colorize, quiet)
     return results
 
 
-def _entries_with_urls(marcxml, write_unchanged, colorize, quiet):
-    # Returns a list of tuples. The tuples are each of the following form:
+def _entries(marcxml, include_unchanged, colorize, quiet):
+    # Generator producing a list of tuples. The tuples are each of this form:
     #   (id, [UrlData, UrlData, ...])
     # where "UrlData" is the UrlData structure retured by urlup for each
     # URL found in field 856 (if any are found) for the MARC XML record.
 
-    results = []
     for e in marcxml.findall('{http://www.loc.gov/MARC21/slim}record'):
         id = ''
         final_urls = []
@@ -139,26 +145,19 @@ def _entries_with_urls(marcxml, write_unchanged, colorize, quiet):
                             extracted_url = eds_url(elem.text.strip())
                             original_urls.append(extracted_url)
         if not id:
+            if __debug__: log('skipping entry without id')
+            continue
+        if not quiet and len(original_urls) <= 0:
+            msg('No URLs in record for {}'.format(id), 'warn', colorize)
+            yield (id, [])
             continue
 
         headers = { 'Cookie': _SESSION_COOKIE }
         url_data = updated_urls(original_urls, headers)
-
-        results.append((id, url_data))
-        if not quiet and len(original_urls) <= 0:
-            msg('No URLs in record for {}'.format(id), 'warn', colorize)
-            continue
-        msgs = []
-        for data in url_data:
-            if data.error:
-                msgs += ['{} produced error: {}'.format(color(data.original, 'error', colorize),
-                                                        color(data.error, 'error', colorize))]
-            else:
-                msgs += ['{} => {}'.format(color(data.original, 'info', colorize),
-                                           color(data.final, 'blue', colorize))]
+        if __debug__: log('got {} URLs for {}'.format(len(url_data), id))
         if not quiet:
-            msg(id + ': ' + ('\n  ' + ' '*len(id)).join(msgs))
-    return results
+            print_url_data(id, url_data, colorize)
+        yield (id, url_data)
 
 
 def tind_records(query, start):
@@ -251,6 +250,22 @@ def substituted(query, cmd, replacement):
         return query + replacement
 
 
+def print_url_data(id, url_data, colorize):
+    for item in url_data:
+        text = []
+        if item.error:
+            if colorize:
+                text += ['{} error: {}'.format(color(item.original, 'error', colorize),
+                                               color(item.error, 'error', colorize))]
+            else:
+                # If not using colorization, go easy on the use of the
+                # 'error' code because the plain-text equivalent is loud.
+                text += ['{}: {}'.format(color(item.original, 'error', colorize),
+                                         color(item.error, 'info', colorize))]
+        else:
+            text += ['{} => {}'.format(color(item.original, 'info', colorize),
+                                       color(item.final, 'blue', colorize))]
+        msg(id + ': ' + ('\n  ' + ' '*len(id)).join(text))
 
 
 
