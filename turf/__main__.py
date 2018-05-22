@@ -98,6 +98,7 @@ If not given an output file, the results will only be printed to the terminal.
         elif not extension:
             msg('"{}" has no name extension; defaulting to xls'.format(output),
                 'warn', colorize)
+    start = int(start)
 
     # Let's do this thing.
     results = []
@@ -122,8 +123,6 @@ If not given an output file, the results will only be printed to the terminal.
         if not results:
             msg('No results returned.', 'warn', colorize)
         elif output:
-            if not quiet:
-                msg('Writing CSV file {}'.format(output), 'info', colorize)
             write_results(output, results, all)
         if not quiet:
             msg('Done.', 'info', colorize)
