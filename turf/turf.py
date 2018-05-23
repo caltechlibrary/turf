@@ -97,9 +97,9 @@ def entries_from_search(search, max_records, start_index, include_unchanged,
             if marcxml:
                 if __debug__: log('processing {} records', len(marcxml))
                 for item in _entries(marcxml, include_unchanged, colorize, quiet):
-                    current += 1
                     yield item
                 sleep(1)                    # Be nice to the server.
+                current += num_records(marcxml)
             else:
                 if __debug__: log('no records received')
                 current = -1
@@ -163,7 +163,8 @@ def _entries(marcxml, include_unchanged, colorize, quiet):
         if __debug__: log('got {} URLs for {}'.format(len(url_data), id))
         if not quiet:
             print_url_data(id, url_data, colorize)
-        yield (id, url_data)
+        if include_unchanged or contains_changed_urls(url_data):
+            yield (id, url_data)
 
 
 def tind_records(query, start, colorize, quiet):
@@ -185,6 +186,10 @@ def tind_records(query, start, colorize, quiet):
             msg('Server returned code {} -- unable to continue'.format(response.status),
                 'error', colorize)
     return None
+
+
+def num_records(marcxml):
+    return len(marcxml.findall('{http://www.loc.gov/MARC21/slim}record'))
 
 
 # Miscellaneous utilities.
@@ -270,11 +275,17 @@ def print_url_data(id, url_data, colorize):
                 # 'error' code because the plain-text equivalent is loud.
                 text += ['{}: {}'.format(color(item.original, 'error', colorize),
                                          color(item.error, 'info', colorize))]
-        else:
+        elif item.original != item.final:
             text += ['{} => {}'.format(color(item.original, 'info', colorize),
                                        color(item.final, 'blue', colorize))]
+        else:
+            text += ['{} {}'.format(color(item.original, 'info', colorize),
+                                    color('[unchanged]', 'dark', colorize))]
         msg(id + ': ' + ('\n  ' + ' '*len(id)).join(text))
 
+
+def contains_changed_urls(url_data):
+    return any(u.original != u.final for u in url_data if u)
 
 
 # Please leave the following for Emacs users.
