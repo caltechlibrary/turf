@@ -1,5 +1,21 @@
-'''
-__main__: main command-line interface to turf
+'''__main__: main command-line interface to turf
+
+There are several hundred thousand entries in https://caltech.tind.io.  Some
+of the entries contain links to other web resources.  As a matter of regular
+maintenance, the links need to be checked periodically for validity, and
+preferrably also updated to point to new destinations if the referenced
+resources have been relocated.
+
+Turf is a small program that downloads records from https://caltech.tind.io,
+examines each one looking for URLs, deferences any found, and then finally
+prints a list of record entries together with old and new URLs.  By default,
+if not given an explicit search string, Turf will do a search for all entries
+that have one or more URLs in MARC field 856.  Alternatively, it can be given
+a search query on the command line; in that case, the string should be a
+complete search URL as would be typed into a web browser address bar (or more
+practically, copied from the browser address bar after performing some
+exploratory searches in https://caltech.tind.io.  Finally, as another
+alternative, it can read MARC XML input from a file when given the -f option.
 
 Authors
 -------
@@ -12,6 +28,7 @@ Copyright
 Copyright (c) 2018 by the California Institute of Technology.  This code is
 open-source software released under a 3-clause BSD license.  Please see the
 file "LICENSE" for more information.
+
 '''
 
 import os
