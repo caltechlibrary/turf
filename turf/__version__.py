@@ -6,7 +6,7 @@
 # @website https://github.com/caltechlibrary/turf
 # =============================================================================
 
-__version__     = '0.1.0'
+__version__     = '0.2.0'
 __title__       = 'turf'
 __description__ = '_TIND.io URL Fixer_ for caltech.tind.io'
 __url__         = 'https://github.com/caltechlibrary/turf'
