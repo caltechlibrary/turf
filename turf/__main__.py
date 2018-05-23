@@ -61,7 +61,7 @@ If given the -m option, it will only fetch and process that many results.
 
 If given an output file, the results will be written to the file.  The format
 of the file will be deduced from the file name extension (.csv or .xlsx).
-In the absence of a file name extension, it will default to XLS format.
+In the absence of a file name extension, it will default to XLSX format.
 If not given an output file, the results will only be printed to the terminal.
 '''
 
@@ -100,7 +100,7 @@ If not given an output file, the results will only be printed to the terminal.
             raise SystemExit(color('"{}" has an unrecognized file extension'.format(output),
                                    'error', colorize))
         elif not extension:
-            msg('"{}" has no name extension; defaulting to xls'.format(output),
+            msg('"{}" has no name extension; defaulting to xlsx'.format(output),
                 'warn', colorize)
     start = int(start)
 
