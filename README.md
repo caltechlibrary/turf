@@ -38,7 +38,7 @@ Both of these installation approaches should automatically install some Python d
 ▶︎ Basic operation
 ------------------
 
-Turf is a command-line application.  On Linux and macOS systems, the installation _should_ place a new program on your shell's search path, so that you can start MOCCASIN with a simple shell command:
+Turf is a command-line application.  On Linux and macOS systems, the installation _should_ place a new program on your shell's search path, so that you can start Turf with a simple shell command:
 ```
 turf
 ```
