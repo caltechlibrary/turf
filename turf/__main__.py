@@ -128,6 +128,8 @@ If not given an output file, the results will only be printed to the terminal.
             msg('No results returned.', 'warn', colorize)
         elif output:
             write_results(output, results, all)
+        else:
+            print_results(results, all)
         if not quiet:
             msg('Done.', 'info', colorize)
 
@@ -140,6 +142,13 @@ def print_version():
     print('Author: {}'.format(turf.__author__))
     print('URL: {}'.format(turf.__url__))
     print('License: {}'.format(turf.__license__))
+
+
+def print_results(results, all):
+    for data in results:
+        # Need to consume the values from the iterator in order for
+        # the underlying object to print itself.
+        pass
 
 
 # Main entry point.

@@ -111,14 +111,17 @@ def entries_from_search(search, max_records, start_index, include_unchanged,
 
 
 def entries_from_file(file, max_records, start_index, include_unchanged, colorize, quiet):
-    # FIXME
-    xmlcontent = None
-    results = []
-    with open(file) as f:
-        if __debug__: log('parsing XML file {}', file)
-        xmlcontent = ElementTree.parse(f)
-        results = _entries(xmlcontent, include_unchanged, colorize, quiet)
-    return results
+    xmlfile = open(file, 'r')
+    if __debug__: log('parsing XML file {}', file)
+    try:
+        xmlcontent = ElementTree.parse(xmlfile)
+        for item in _entries(xmlcontent, include_unchanged, colorize, quiet):
+            yield item
+    except KeyboardInterrupt:
+        msg('Stopped', 'warn', colorize)
+        raise
+    finally:
+        xmlfile.close()
 
 
 def _entries(marcxml, include_unchanged, colorize, quiet):
