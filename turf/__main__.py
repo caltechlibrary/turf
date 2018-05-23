@@ -111,8 +111,6 @@ If not given an output file, the results will only be printed to the terminal.
         start_at = 1
     if total and total == 'N':
         total = None
-    if search:
-        search = search[0]         # Compensate for how plac provides arg value.
 
     # Process arguments.
     if version:
@@ -121,13 +119,19 @@ If not given an output file, the results will only be printed to the terminal.
     if file and search:
         raise SystemExit(color('Cannot use a file and search string simultaneously',
                                'error', colorize))
-    if not file and not search:
-        search = _DEFAULT_SEARCH
-        msg('No search term provided -- will use default:', 'info', colorize)
-        msg(search, 'info', colorize)
     if file and not file.endswith('.xml'):
         raise SystemExit(color('"{}" does not appear to be an XML file'
                                .format(file), 'error', colorize))
+    if search:
+        if any(item.startswith('-') for item in search):
+            raise SystemExit(color('Command not recognized: {}'.format(search),
+                                   'error', colorize))
+        else:
+            search = search[0]  # Compensate for how plac provides arg value.
+    if not search:
+        search = _DEFAULT_SEARCH
+        msg('No search term provided -- will use default:', 'info', colorize)
+        msg(search, 'info', colorize)
     if total and not quiet:
         total = int(total)
         msg('Will stop after getting {} records'.format(total), 'info', colorize)
