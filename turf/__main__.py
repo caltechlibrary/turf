@@ -28,36 +28,54 @@ from turf.messages import msg, color
 from turf.writers import write_results
 
 
+# Global constants.
+# .............................................................................
+
+_DEFAULT_SEARCH = 'https://caltech.tind.io/search?ln=en&p=856%3A%25&f=&sf=&so=d'
+'''Default search performed if no explicit search string is given.'''
+
+
 # Main program.
 # ......................................................................
 
 @plac.annotations(
     all       = ('write all entries, not only those with URLs',       'flag',   'a'),
-    input     = ('read MARC from file instead of searching tind.io',  'option', 'i'),
-    max       = ('retrieve at most this many results (default: all)', 'option', 'm'),
+    file      = ('read MARC from file instead of searching tind.io',  'option', 'f'),
     output    = ('write output to the given file',                    'option', 'o'),
-    quiet     = ('do not print any messages while working',           'flag',   'q'),
-    start     = ("start with Nth record (default: start at 1)",       'option', 's'),
+    quiet     = ('do not print messages while working',               'flag',   'q'),
+    start_at  = ("start with Nth record (default: start at 1)",       'option', 's'),
+    total     = ('stop after processing N records (default: all)',    'option', 't'),
     unchanged = ("write entries with URLs even if they're unchanged", 'flag',   'u'),
     no_color  = ('do not color-code terminal output',                 'flag',   'C'),
     version   = ('print version info and exit',                       'flag',   'V'),
     search    = 'complete search URL (default: none)',
 )
 
-def main(all=False, input=None, output=None, quiet=False, max=None,
-         start=1, unchanged=False, no_color=False, version=False, *search):
+def main(all=False, file=None, output=None, start_at='N', total='N',
+         unchanged=False, quiet=False, no_color=False, version=False, *search):
     '''Look for caltech.tind.io records containing URLs and return updated URLs.
-If given a search query, it should be a complete search url as would be typed
-into a web browser.  If given a file, it should be in MARC XML format.
 
-By default, it writes out only entries that have URLs in MARC field 856, and
-then only those whose URLs are found to dereference to a different URL after
-following it.  If given the -u flag, it will write out entries with URLs even
-if the URLs are unchanged after dereferencing.  If given the -a flag, it will
-write out all entries retrieved, even those that have no URLs.
+If not given an explicit search query, it will perform a default search that
+looks for records containing URLs in MARC field 856.  If given a search query
+on the command line, the string should be a complete search URL as would be
+typed into a web browser address bar (or more practically, copied from the
+browser address bar after performing some exploratory searches in
+caltech.tind.io).  If given a file using the -f option, the file should
+contain MARC XML content.
 
-If given the -m option, it will only fetch and process that many results.
-(The default is to process all of them.)
+By default, this program only writes out entries that have URLs in MARC field
+856, and then only those whose URLs are found to dereference to a different
+URL after following it.  (That is, by default, it skips writing entries whose
+URLs are not found to change after dereferencing.)  If given the -u flag, it
+will write out entries with URLs even if the URLs are unchanged after
+dereferencing.  If given the -a flag, it will write out all entries
+retrieved, even those that have no URLs.
+
+If given the -t option, it will only fetch and process a total of that many
+results instead of all results.  If given the -s option, it will start at
+that entry instead of starting at number 1; this is useful if searches are
+being done in batches or a previous search is interrupted and you don't want
+to restart from 1.
 
 If given an output file, the results will be written to the file.  The format
 of the file will be deduced from the file name extension (.csv or .xlsx).
@@ -70,22 +88,32 @@ If not given an output file, the results will only be printed to the terminal.
     # Dealing with negated variables is confusing, so turn them around here.
     colorize = 'termcolor' in sys.modules and not no_color
 
+    # We use default values that provide more intuitive help text printed by
+    # plac.  Rewrite the values to things we actually use.
+    if start_at and start_at == 'N':
+        start_at = 1
+    if total and total == 'N':
+        total = None
+    if search:
+        search = search[0]         # Compensate for how plac provides arg value.
+
     # Process arguments.
     if version:
         print_version()
         sys.exit()
-    if input and search:
+    if file and search:
         raise SystemExit(color('Cannot use a file and search string simultaneously',
                                'error', colorize))
-    if not input and not search:
-        raise SystemExit(color('Must provide either a file or a search term',
-                               'error', colorize))
-    if input and not input.endswith('.xml'):
+    if not file and not search:
+        search = _DEFAULT_SEARCH
+        msg('No search term provided -- will use default:', 'info', colorize)
+        msg(search, 'info', colorize)
+    if file and not file.endswith('.xml'):
         raise SystemExit(color('"{}" does not appear to be an XML file'
-                               .format(input), 'error', colorize))
-    if max and not quiet:
-        max = int(max)
-        msg('Will stop after getting {} records'.format(max), 'info', colorize)
+                               .format(file), 'error', colorize))
+    if total and not quiet:
+        total = int(total)
+        msg('Will stop after getting {} records'.format(total), 'info', colorize)
     if not output and not quiet:
         msg("No output file specified; results won't be saved.", 'warn', colorize)
     elif not quiet:
@@ -102,25 +130,25 @@ If not given an output file, the results will only be printed to the terminal.
         elif not extension:
             msg('"{}" has no name extension; defaulting to xlsx'.format(output),
                 'warn', colorize)
-    start = int(start)
+    start_at = int(start_at)
 
     # Let's do this thing.
     results = []
     try:
-        if input:
-            file = None
-            if os.path.exists(input):
-                file = input
-            elif os.path.exists(os.path.join(os.getcwd(), input)):
-                file = os.path.join(os.getcwd(), input)
+        if file:
+            input = None
+            if os.path.exists(file):
+                input = file
+            elif os.path.exists(os.path.join(os.getcwd(), file)):
+                input = os.path.join(os.getcwd(), file)
             else:
-                raise SystemExit(color('Cannot find file "{}"'.format(input),
+                raise SystemExit(color('Cannot find file "{}"'.format(file),
                                        'error', colorize))
             if not quiet:
-                msg('Reading MARC XML from {}'.format(file), 'info', colorize)
-            results = entries_from_file(file, max, start, unchanged, colorize, quiet)
+                msg('Reading MARC XML from {}'.format(input), 'info', colorize)
+            results = entries_from_file(input, total, start_at, unchanged, colorize, quiet)
         else:
-            results = entries_from_search(search[0], max, start, unchanged, colorize, quiet)
+            results = entries_from_search(search, total, start_at, unchanged, colorize, quiet)
     except Exception as e:
         msg('Exception encountered: {}'.format(e))
     finally:
