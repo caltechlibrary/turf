@@ -76,6 +76,9 @@ def write_csv(filename, results, all):
     csvwriter = csv.writer(file, delimiter=',')
     try:
         for data in results:
+            if not data:
+                if __debug__: log('no data -- stopping')
+                break
             tind_id = data[0]
             data_list = data[1]
             if __debug__: log('writing row for {}'.format(tind_id))
@@ -135,6 +138,9 @@ def write_xls(filename, results, all):
     try:
         for row, data in enumerate(results, 2):
             if __debug__: log('writing row {}'.format(row))
+            if not data:
+                if __debug__: log('no data -- stopping')
+                break
             tind_id = data[0]
             data_list = data[1]
 

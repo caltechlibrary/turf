@@ -93,7 +93,7 @@ def entries_from_search(search, max_records, start_index, include_unchanged,
         if max_records and current > stop:
             break
         try:
-            marcxml = tind_records(search, current)
+            marcxml = tind_records(search, current, colorize, quiet)
             if marcxml:
                 if __debug__: log('processing {} records', len(marcxml))
                 for item in _entries(marcxml, include_unchanged, colorize, quiet):
@@ -104,10 +104,12 @@ def entries_from_search(search, max_records, start_index, include_unchanged,
                 if __debug__: log('no records received')
                 current = -1
         except KeyboardInterrupt:
-            if max_records and current > stop:
-                msg('Stopped', 'warn', colorize)
+            msg('Stopped', 'warn', colorize)
             current = -1
-            raise
+        except Exception as err:
+            msg('Error: {}'.format(err), 'warn', colorize)
+            current = -1
+    yield None
 
 
 def entries_from_file(file, max_records, start_index, include_unchanged, colorize, quiet):
@@ -119,7 +121,7 @@ def entries_from_file(file, max_records, start_index, include_unchanged, coloriz
             yield item
     except KeyboardInterrupt:
         msg('Stopped', 'warn', colorize)
-        raise
+        yield None
     finally:
         xmlfile.close()
 
@@ -164,7 +166,7 @@ def _entries(marcxml, include_unchanged, colorize, quiet):
         yield (id, url_data)
 
 
-def tind_records(query, start):
+def tind_records(query, start, colorize, quiet):
     query = substituted(query, '&jrec=', '&jrec=' + str(start))
     parts = urlsplit(query)
     if parts.scheme == 'https':
@@ -179,7 +181,9 @@ def tind_records(query, start):
         body = response.read().decode("utf-8")
         return ElementTree.fromstring(body)
     elif response.status in [301, 302, 303, 308]:
-        msg('server returned code {} -- unable to continue'.format(response.status))
+        if not quiet:
+            msg('Server returned code {} -- unable to continue'.format(response.status),
+                'error', colorize)
     return None
 
 
