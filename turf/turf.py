@@ -90,7 +90,7 @@ def entries_from_search(search, max_records, start_index, include_unchanged,
     if __debug__: log('getting records starting at {}', start_index)
     stop = start_index + (max_records or 0)
     while current > 0:
-        if max_records and current > stop:
+        if max_records and current >= stop:
             break
         try:
             marcxml = tind_records(search, current, colorize, quiet)
