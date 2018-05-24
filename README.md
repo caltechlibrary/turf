@@ -63,8 +63,17 @@ Turf won't write the results to a file unless told to do so using the `-o` optio
 turf -o results.xlsx
 ```
 
-By default, Turf prints a message for every record it processes.  This helps to see that it is working.
+By default, Turf prints a message for every record it processes, so that the user can get a sense of what is happening.  When told to save results to a file, however, it does _not_ write every record by default.  Instead, by default, it saves only the records that contain URLs and for which the URLs are found to dereference to a different final destination.  This behavior can be controlled via two flags, `-u` and `-a`.  If given `-u`, Turf will write out records with URLs even if the URLs dereference to the same location.  If given `-a`, Turf will write all records even if they don't have any URLs.
 
+The difference between `-a` and `-u` is not evident from the default search performed by Turf because it only searches for records with URLs; however, the difference is easier to see when Turf is given a more general search such query such as the following
+
+```
+https://caltech.tind.io/search?action_search=Search&rm=wrd&so=d
+```
+
+which will retrieve all records.  The following screencast tries to demonstrate this.
+
+[![demo](.graphics/turf-asciinema.png)](https://asciinema.org/a/kFvuHPMX51zhc95P1zDeqrmjQ)
 
 
 Finally, the following table summarizes all the command line options available:
