@@ -68,7 +68,7 @@ _DEFAULT_SEARCH = 'https://caltech.tind.io/search?ln=en&p=856%3A%25&f=&sf=&so=d'
     search    = 'complete search URL (default: none)',
 )
 
-def main(all=False, file=None, output=None, start_at='N', total='N',
+def main(all=False, file=None, output=None, start_at='N', total='M',
          unchanged=False, quiet=False, no_color=False, version=False, *search):
     '''Look for caltech.tind.io records containing URLs and return updated URLs.
 
@@ -109,7 +109,7 @@ If not given an output file, the results will only be printed to the terminal.
     # plac.  Rewrite the values to things we actually use.
     if start_at and start_at == 'N':
         start_at = 1
-    if total and total == 'N':
+    if total and total == 'M':
         total = None
 
     # Process arguments.
