@@ -61,7 +61,7 @@ _DEFAULT_SEARCH = 'https://caltech.tind.io/search?ln=en&p=856%3A%25&f=&sf=&so=d'
     output    = ('write output to the given file',                    'option', 'o'),
     quiet     = ('do not print messages while working',               'flag',   'q'),
     start_at  = ("start with Nth record (default: start at 1)",       'option', 's'),
-    total     = ('stop after processing N records (default: all)',    'option', 't'),
+    total     = ('stop after processing M records (default: all)',    'option', 't'),
     unchanged = ("write entries with URLs even if they're unchanged", 'flag',   'u'),
     no_color  = ('do not color-code terminal output',                 'flag',   'C'),
     version   = ('print version info and exit',                       'flag',   'V'),
@@ -133,16 +133,17 @@ If not given an output file, the results will only be printed to the terminal.
         msg('No search term provided -- will use default:', 'info', colorize)
         msg(search, 'info', colorize)
     if total and not quiet:
-        total = int(total)
         msg('Will stop after getting {} records'.format(total), 'info', colorize)
+    if total:
+        total = int(total)
     if not output and not quiet:
         msg("No output file specified; results won't be saved.", 'warn', colorize)
     elif not quiet:
         msg('Output will be written to {}'.format(output), 'info', colorize)
         if all:
-            msg('Writing all results, including those without URLs', 'info', colorize)
+            msg('Saving all results, including those without URLs', 'info', colorize)
         else:
-            msg('Writing only relevant results', 'info', colorize)
+            msg('Saving only relevant results', 'info', colorize)
     if output:
         name, extension = os.path.splitext(output)
         if extension and extension.lower() not in ['.csv', '.xlsx']:
@@ -167,18 +168,18 @@ If not given an output file, the results will only be printed to the terminal.
                                        'error', colorize))
             if not quiet:
                 msg('Reading MARC XML from {}'.format(input), 'info', colorize)
-            results = entries_from_file(input, total, start_at, unchanged, colorize, quiet)
+            results = entries_from_file(input, total, start_at, colorize, quiet)
         else:
-            results = entries_from_search(search, total, start_at, unchanged, colorize, quiet)
+            results = entries_from_search(search, total, start_at, colorize, quiet)
     except Exception as e:
         msg('Exception encountered: {}'.format(e))
     finally:
         if not results:
             msg('No results returned.', 'warn', colorize)
         elif output:
-            write_results(output, results, all)
+            write_results(output, results, unchanged, all)
         else:
-            print_results(results, all)
+            print_results(results)
         if not quiet:
             msg('Done.', 'info', colorize)
 
@@ -193,7 +194,7 @@ def print_version():
     print('License: {}'.format(turf.__license__))
 
 
-def print_results(results, all):
+def print_results(results):
     for data in results:
         # Need to consume the values from the iterator in order for
         # the underlying object to print itself.
