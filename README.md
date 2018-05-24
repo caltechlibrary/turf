@@ -94,7 +94,7 @@ Finally, the following table summarizes all the command line options available:
 ⁇ Getting help and support
 --------------------------
 
-If you find an issue, please submit it in [the GitHub issue tracker](https://github.com/caltechlibrary/turf/issues) for this repository.
+If you find an issue, please submit it in [the GitHub issue tracker](https://github.com/caltechlibrary/turf/issues) for this repository.  Alternatively, you can [send email](mailto:helpdesk@library.caltech.edu) to the Digital Library Development team at Caltech.
 
 ★ Do you like it?
 ------------------
