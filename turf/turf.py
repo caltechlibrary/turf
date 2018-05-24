@@ -74,8 +74,7 @@ _EDS_ROOT_URL = 'http://web.b.ebscohost.com/pfi/detail/detail?vid=4&bdata=JnNjb3
 # field 001 is the tind record number
 # field 856 is a URL, if there is one
 
-def entries_from_search(search, max_records, start_index, include_unchanged,
-                        colorize, quiet):
+def entries_from_search(search, max_records, start_index, colorize, quiet):
     # Get results in batches of a certain number of records.
     if max_records and max_records < _FETCH_COUNT:
         search = substituted(search, '&rg=', '&rg=' + str(max_records))
@@ -85,48 +84,57 @@ def entries_from_search(search, max_records, start_index, include_unchanged,
     search = substituted(search, '&of=', '&of=xm')
     # Remove any 'ot' field because it screws up results.
     search = substituted(search, '&ot=', '')
-    if __debug__: log('query string: {}', search)
+    # Set starting and stopping points.
     current = start_index
+    stop = (start_index + max_records) if max_records else sys.maxsize
+    if __debug__: log('query string: {}', search)
     if __debug__: log('getting records starting at {}', start_index)
-    stop = start_index + (max_records or 0)
-    while current > 0:
-        if max_records and current >= stop:
-            break
+    if __debug__: log('will stop at {} records', stop)
+    while 0 < current < stop:
         try:
             marcxml = tind_records(search, current, colorize, quiet)
-            if marcxml:
-                if __debug__: log('processing {} records', len(marcxml))
-                for item in _entries(marcxml, include_unchanged, colorize, quiet):
-                    yield item
-                sleep(1)                    # Be nice to the server.
-                current += num_records(marcxml)
-            else:
+            if not marcxml:
                 if __debug__: log('no records received')
                 current = -1
+                break
+            if __debug__: log('looping over {} TIND records', len(marcxml))
+            for data in _record_data(marcxml):
+                current += 1
+                if not quiet:
+                    print_record_data(data, colorize)
+                yield data
+                if current >= stop:
+                    break
         except KeyboardInterrupt:
             msg('Stopped', 'warn', colorize)
             current = -1
         except Exception as err:
-            msg('Error: {}'.format(err), 'warn', colorize)
+            msg('Error: {}'.format(err), 'error', colorize)
             current = -1
+        sleep(1)                        # Be nice to the server.
+    if current >= stop:
+        if __debug__: log('stopping point reached')
     yield None
 
 
-def entries_from_file(file, max_records, start_index, include_unchanged, colorize, quiet):
+def entries_from_file(file, max_records, start_index, colorize, quiet):
     xmlfile = open(file, 'r')
     if __debug__: log('parsing XML file {}', file)
     try:
         xmlcontent = ElementTree.parse(xmlfile)
-        for item in _entries(xmlcontent, include_unchanged, colorize, quiet):
-            yield item
+        for data in _record_data(xmlcontent):
+            yield data
     except KeyboardInterrupt:
         msg('Stopped', 'warn', colorize)
+        yield None
+    except Exception as err:
+        msg('Error: {}'.format(err), 'error', colorize)
         yield None
     finally:
         xmlfile.close()
 
 
-def _entries(marcxml, include_unchanged, colorize, quiet):
+def _record_data(marcxml):
     # Generator producing a list of tuples. The tuples are each of this form:
     #   (id, [UrlData, UrlData, ...])
     # where "UrlData" is the UrlData structure retured by urlup for each
@@ -153,18 +161,15 @@ def _entries(marcxml, include_unchanged, colorize, quiet):
         if not id:
             if __debug__: log('skipping entry without id')
             continue
-        if not quiet and len(original_urls) <= 0:
-            msg('No URLs in record for {}'.format(id), 'warn', colorize)
+        if len(original_urls) == 0:
+            if __debug__: log('No URLs in record for {}', id)
             yield (id, [])
             continue
 
         headers = { 'Cookie': _SESSION_COOKIE }
         url_data = updated_urls(original_urls, headers)
-        if __debug__: log('got {} URLs for {}'.format(len(url_data), id))
-        if not quiet:
-            print_url_data(id, url_data, colorize)
-        if include_unchanged or contains_changed_urls(url_data):
-            yield (id, url_data)
+        if __debug__: log('got {} URLs for {}', len(url_data), id)
+        yield (id, url_data)
 
 
 def tind_records(query, start, colorize, quiet):
@@ -263,7 +268,12 @@ def substituted(query, cmd, replacement):
         return query + replacement
 
 
-def print_url_data(id, url_data, colorize):
+def print_record_data(record, colorize):
+    id = record[0]
+    url_data = record[1]
+    if url_data == 0:
+        msg('No URLs for {}'.format(id), 'warn', colorize)
+        return
     for item in url_data:
         text = []
         if item.error:
@@ -282,10 +292,6 @@ def print_url_data(id, url_data, colorize):
             text += ['{} {}'.format(color(item.original, 'info', colorize),
                                     color('[unchanged]', 'dark', colorize))]
         msg(id + ': ' + ('\n  ' + ' '*len(id)).join(text))
-
-
-def contains_changed_urls(url_data):
-    return any(u.original != u.final for u in url_data if u)
 
 
 # Please leave the following for Emacs users.

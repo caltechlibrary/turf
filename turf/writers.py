@@ -56,16 +56,16 @@ _NUM_URLS = 5
 # where "UrlData" is the UrlData structure retured by urlup for each
 # URL found in field 856 (if any are found) for the MARC XML record.
 
-def write_results(filename, results, all):
+def write_results(filename, results, include_unchanged, all):
     # Call on appropriate functions for the desired output format.
     name, extension = os.path.splitext(filename)
     if extension.lower() == '.csv':
-        write_csv(filename, results, all)
+        write_csv(filename, results, include_unchanged, all)
     else:
-        write_xls(filename, results, all)
+        write_xls(filename, results, include_unchanged, all)
 
 
-def write_csv(filename, results, all):
+def write_csv(filename, results, include_unchanged, all):
     file = open(filename, 'w', newline='')
 
     # Write the header row.
@@ -81,8 +81,14 @@ def write_csv(filename, results, all):
                 break
             tind_id = data[0]
             data_list = data[1]
-            if __debug__: log('writing row for {}'.format(tind_id))
+            if not data_list and not all:
+                if __debug__: log('no URLs for {} -- not saving'.format(tind_id))
+                continue
+            if not contains_changed_urls(data_list) and not (include_unchanged or all):
+                if __debug__: log('URLs unchanged for {} -- skipping'.format(tind_id))
+                continue
             row = [tind_id]
+            if __debug__: log('writing row for {}'.format(tind_id))
             for url_data in data_list:
                 row.append(url_data.original)
                 if url_data.error:
@@ -100,7 +106,7 @@ def write_csv(filename, results, all):
         file.close()
 
 
-def write_xls(filename, results, all):
+def write_xls(filename, results, include_unchanged, all):
     # Create some things we reuse below.
     bold_style = Font(bold = True, underline = "single")
     hyperlink_style = Font(underline='single', color='0563C1')
@@ -136,21 +142,22 @@ def write_xls(filename, results, all):
 
     # Now create the data rows.
     try:
-        for row, data in enumerate(results, 2):
-            if __debug__: log('writing row {}'.format(row))
+        for row_number, data in enumerate(results, 2):
             if not data:
                 if __debug__: log('no data -- stopping')
                 break
             tind_id = data[0]
             data_list = data[1]
-
-            if data_list or all:
-                cell = WriteOnlyCell(sheet, value = tind_id)
-                cell.hyperlink = tind_entry_link(tind_id)
-                cell.font = hyperlink_style
-            else:
+            if not data_list and not all:
+                if __debug__: log('no URLs for {} -- not saving'.format(tind_id))
                 continue
-
+            if not contains_changed_urls(data_list) and not (include_unchanged or all):
+                if __debug__: log('URLs unchanged for {} -- skipping'.format(tind_id))
+                continue
+            if __debug__: log('writing row {}'.format(row_number))
+            cell = WriteOnlyCell(sheet, value = tind_id)
+            cell.hyperlink = tind_entry_link(tind_id)
+            cell.font = hyperlink_style
             row = [cell]
             for url_data in data_list:
                 cell = WriteOnlyCell(sheet, value = url_data.original)
@@ -183,6 +190,10 @@ def only_with_urls(results):
 
 def tind_entry_link(tind_id):
     return 'https://caltech.TIND.io/record/{}'.format(tind_id)
+
+
+def contains_changed_urls(url_data):
+    return any(item.original != item.final for item in url_data if item)
 
 
 # For Emacs users
