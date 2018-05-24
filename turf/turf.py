@@ -271,7 +271,7 @@ def substituted(query, cmd, replacement):
 def print_record_data(record, colorize):
     id = record[0]
     url_data = record[1]
-    if url_data == 0:
+    if len(url_data) == 0:
         msg('No URLs for {}'.format(id), 'warn', colorize)
         return
     for item in url_data:
