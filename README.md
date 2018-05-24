@@ -14,9 +14,9 @@ Turf (_TIND.io URL Fixer_) is a program to download records from the Caltech TIN
 ☀ Introduction
 -----------------------------
 
-There are several hundred thousand entries in [https://caltech.tind.io](https://caltech.tind.io).  Some of the entries contain links to other web resources.  As a matter of regular maintenance, the links need to be checked periodically for validity, and preferably also updated to point to new destinations if the referenced resources have been relocated.
+There are several hundred thousand records in [https://caltech.tind.io](https://caltech.tind.io).  Some of the records contain links to other web resources.  As a matter of regular maintenance, the links need to be checked periodically for validity, and preferably also updated to point to new destinations if the referenced resources have been relocated.
 
-Turf is a small program that downloads records from [https://caltech.tind.io](https://caltech.tind.io), examines each one looking for URLs, deferences any found, and then finally prints a list of record entries together with old and new URLs.  By default, if not given an explicit search string, Turf will do a search for all entries that have one or more URLs in MARC field 856.  Alternatively, it can be given a search query on the command line; in that case, the string should be a complete search URL as would be typed into a web browser address bar (or more practically, copied from the browser address bar after performing some exploratory searches in [https://caltech.tind.io](https://caltech.tind.io).  Finally, as another alternative, it can read MARC XML input from a file when given the `-f` option.
+Turf is a small program that downloads records from [https://caltech.tind.io](https://caltech.tind.io), examines each one looking for URLs, deferences any found, and then finally prints a list of records together with old and new URLs.  By default, if not given an explicit search string, Turf will do a search for all records that have one or more URLs in MARC field 856.  Alternatively, it can be given a search query on the command line; in that case, the string should be a complete search URL as would be typed into a web browser address bar (or more practically, copied from the browser address bar after performing some exploratory searches in [https://caltech.tind.io](https://caltech.tind.io).  Finally, as another alternative, it can read MARC XML input from a file when given the `-f` option.
 
 ✺ Installation instructions
 ---------------------------
@@ -63,19 +63,23 @@ Turf won't write the results to a file unless told to do so using the `-o` optio
 turf -o results.xlsx
 ```
 
-The following table describes the command line options available.
+By default, Turf prints a message for every record it processes.  This helps to see that it is working.
+
+
+
+Finally, the following table summarizes all the command line options available:
 
 | Short    | Long&nbsp;form&nbsp;option | Meaning | Default |
 |----------|---------------|----------------------|---------|
-| `-a`     | `--all`       | Write all entries, not only those with URLs | Only write entries with URLs |
+| `-a`     | `--all`       | Save all records, not only those with URLs in MARC field 856 (implies `-u`) | Only write records containing URLs |
 | `-f`     | `--file`      | Read MARC XML content from the named file | Search caltech.tind.io | 
-| `-o`     | `--output`    | Write output to the named file | Only print results to the terminal |
+| `-o`     | `--output`    | Save output to the named file | Only print results to the terminal |
 | `-s`_N_  | `--start-at`_N_  | Start with the <i>N</i><sup>th</sup> record | Start at the first record |
-| `-t`_N_  | `--total`_N_     | Stop after processing _N_ records | Go through all results found |
-| `-u`     | `--unchanged` | Write entries whose URLs don't change after dereferencing them | Only write entries whose URLs change |
-| `-q`     | `--quiet`     | Don't print messages while working | Print messages while working |
-| `-C`     | `--no-color`  | Don't color-code the terminal output | Use colors in the terminal output |
-| `-V`     | `--version`   | Print program version info and exit | Do search and other work |
+| `-t`_M_  | `--total`_M_     | Stop after processing _M_ records | Process all results found |
+| `-u`     | `--unchanged` | Include records whose URLs don't change after dereferencing them | Only save records whose URLs change |
+| `-q`     | `--quiet`     | Don't print messages while working | Be chatty while working |
+| `-C`     | `--no-color`  | Don't color-code the terminal output | Use colors in the output |
+| `-V`     | `--version`   | Only print program version info and exit | Do other work |
 
 
 ⁇ Getting help and support
