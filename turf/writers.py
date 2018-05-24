@@ -156,12 +156,12 @@ def write_xls(filename, results, include_unchanged, all):
                 continue
             if __debug__: log('writing row {}'.format(row_number))
             cell = WriteOnlyCell(sheet, value = tind_id)
-            cell.hyperlink = tind_entry_link(tind_id)
+            cell.value = hyperlink(tind_entry_url(tind_id))
             cell.font = hyperlink_style
             row = [cell]
             for url_data in data_list:
                 cell = WriteOnlyCell(sheet, value = url_data.original)
-                cell.hyperlink = url_data.original
+                cell.value = hyperlink(url_data.original)
                 cell.font = hyperlink_style
                 row.append(cell)
                 if url_data.error:
@@ -169,7 +169,7 @@ def write_xls(filename, results, include_unchanged, all):
                     cell.font = error_style
                 else:
                     cell = WriteOnlyCell(sheet, value = url_data.final)
-                    cell.hyperlink = (url_data.final or '')
+                    cell.value = hyperlink(url_data.final or '')
                     cell.font = hyperlink_style
                 row.append(cell)
             sheet.append(row)
@@ -188,8 +188,12 @@ def only_with_urls(results):
     return [r for r in results if r[1]]
 
 
-def tind_entry_link(tind_id):
+def tind_entry_url(tind_id):
     return 'https://caltech.TIND.io/record/{}'.format(tind_id)
+
+
+def hyperlink(url):
+    return '=HYPERLINK("{}", "{}")'.format(url, url)
 
 
 def contains_changed_urls(url_data):
