@@ -14,7 +14,7 @@ Turf (_TIND.io URL Fixer_) is a program to download records from the Caltech TIN
 
 There are several hundred thousand records in [https://caltech.tind.io](https://caltech.tind.io).  Some of the records contain links to other web resources.  As a matter of regular maintenance, the links need to be checked periodically for validity, and preferably also updated to point to new destinations if the referenced resources have been relocated.
 
-Turf is a small program that downloads records from [https://caltech.tind.io](https://caltech.tind.io), examines each one looking for URLs, deferences any found, and then finally prints a list of records together with old and new URLs.  By default, if not given an explicit search string, Turf will do a search for all records that have one or more URLs in MARC field 856.  Alternatively, it can be given a search query on the command line; in that case, the string should be a complete search URL as would be typed into a web browser address bar (or more practically, copied from the browser address bar after performing some exploratory searches in [https://caltech.tind.io](https://caltech.tind.io).  Finally, as another alternative, it can read MARC XML input from a file when given the `-f` option.
+Turf is a small program that downloads records from [https://caltech.tind.io](https://caltech.tind.io), examines each one looking for URLs, deferences any found, and then finally prints a list of records together with old and new URLs.  By default, if not given an explicit search string, Turf will do a search for all records that have one or more URLs in MARC field 856.  Alternatively, it can be given a search query on the command line; in that case, the string should be a complete search URL as would be typed into a web browser address bar (or more practically, copied from the browser address bar after performing some exploratory searches in [https://caltech.tind.io](https://caltech.tind.io).  Finally, as another alternative, it can read MARC XML input from a file when given the `-f` option (`/f` on Windows).
 
 ✺ Installation instructions
 ---------------------------
@@ -36,7 +36,7 @@ Both of these installation approaches should automatically install some Python d
 ▶︎ Basic operation
 ------------------
 
-Turf is a command-line application.  On Linux and macOS systems, the installation _should_ place a new program on your shell's search path, so that you can start Turf with a simple shell command:
+Turf is a command-line application.  On Linux and macOS systems, the installation _should_ place a new program on your shell's search path, so that you can start Turf with a simple terminal command:
 ```
 turf
 ```
@@ -56,14 +56,14 @@ When run without any arguments, Turf will execute a search in [https://caltech.t
 turf 'https://caltech.tind.io/search?ln=en&p=856%3A%25&f=&sf=&so=d'
 ```
 
-Turf won't write the results to a file unless told to do so using the `-o` option.  It can write the results either in `.csv` or `.xlsx` format, and it inspects the file name to figure out which format to write.  For example, the following will make it produce an Excel file as output:
+Turf won't write the results to a file unless told to do so using the `-o` option (`/o` on Windows).  It can write the results either in `.csv` or `.xlsx` format, and it inspects the file name to figure out which format to write.  For example, the following will make it produce an Excel file as output:
 ```
 turf -o results.xlsx
 ```
 
-By default, Turf prints a message for every record it processes, so that the user can get a sense of what is happening.  When told to save results to a file, however, it does _not_ write every record by default.  Instead, by default, it saves only the records that contain URLs and for which the URLs are found to dereference to a different final destination.  This behavior can be controlled via two flags, `-u` and `-a`.  If given `-u`, Turf will write out records with URLs even if the URLs dereference to the same location.  If given `-a`, Turf will write all records even if they don't have any URLs.
+By default, Turf prints a message for every record it processes, so that the user can get a sense of what is happening.  When told to save results to a file, however, it does _not_ write every record by default.  Instead, by default, it saves only the records that contain URLs and for which the URLs are found to dereference to a different final destination.  This behavior can be controlled via two flags, `-u` and `-a`.  If given `-u` (`/u` on Windows), Turf will write out records with URLs even if the URLs dereference to the same location.  If given `-a` (`/a` on Windows), Turf will write all records even if they don't have any URLs.
 
-The difference between `-a` and `-u` is not evident from the default search performed by Turf because it only searches for records with URLs; however, the difference is easier to see when Turf is given a more general search such query such as the following
+The difference between `-a` and `-u` (`/a` and `/u` on Windows) is not evident from the default search performed by Turf because it only searches for records with URLs; however, the difference is easier to see when Turf is given a more general search such query such as the following
 
 ```
 https://caltech.tind.io/search?action_search=Search&rm=wrd&so=d
@@ -74,7 +74,7 @@ which will retrieve all records.  The following screencast tries to demonstrate 
 [![demo](.graphics/turf-asciinema.png)](https://asciinema.org/a/kFvuHPMX51zhc95P1zDeqrmjQ)
 
 
-Finally, the following table summarizes all the command line options available:
+Finally, the following table summarizes all the command line options available. (Note: on Windows computers, `/` must be used instead of `-`):
 
 | Short    | Long&nbsp;form&nbsp;option | Meaning | Default |
 |----------|---------------|----------------------|---------|

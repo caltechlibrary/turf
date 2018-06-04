@@ -15,7 +15,8 @@ a search query on the command line; in that case, the string should be a
 complete search URL as would be typed into a web browser address bar (or more
 practically, copied from the browser address bar after performing some
 exploratory searches in https://caltech.tind.io.  Finally, as another
-alternative, it can read MARC XML input from a file when given the -f option.
+alternative, it can read MARC XML input from a file when given the -f option
+(/f on Windows).
 
 Authors
 -------
@@ -77,28 +78,29 @@ looks for records containing URLs in MARC field 856.  If given a search query
 on the command line, the string should be a complete search URL as would be
 typed into a web browser address bar (or more practically, copied from the
 browser address bar after performing some exploratory searches in
-caltech.tind.io).  If given a file using the -f option, the file should
-contain MARC XML content.
+caltech.tind.io).  If given a file using the -f option (/f on Windows), the
+file should contain MARC XML content.
 
 By default, this program only writes out entries that have URLs in MARC field
 856, and then only those whose URLs are found to dereference to a different
 URL after following it.  (That is, by default, it skips writing entries whose
-URLs are not found to change after dereferencing.)  If given the -u flag, it
-will write out entries with URLs even if the URLs are unchanged after
-dereferencing.  If given the -a flag, it will write out all entries
-retrieved, even those that have no URLs.
+URLs are not found to change after dereferencing.)  If given the -u flag
+(/u on Windows), it will write out entries with URLs even if the URLs are
+unchanged after dereferencing.  If given the -a flag (/a on Windows), it will
+write out all entries retrieved, even those that have no URLs.
 
-If given the -t option, it will only fetch and process a total of that many
-results instead of all results.  If given the -s option, it will start at
-that entry instead of starting at number 1; this is useful if searches are
-being done in batches or a previous search is interrupted and you don't want
-to restart from 1.
+If given the -t option (/t on Windows), it will only fetch and process a total
+of that many results instead of all results.  If given the -s option, it will
+start at that entry instead of starting at number 1; this is useful if searches
+are being done in batches or a previous search is interrupted and you don't
+want to restart from 1.
 
 If given an output file, the results will be written to the file.  The format
 of the file will be deduced from the file name extension (.csv or .xlsx).
 In the absence of a file name extension, it will default to XLSX format.
 If not given an output file, the results will only be printed to the terminal.
-'''
+
+    '''
 
     # Our defaults are to do things like color the output, which means the
     # command line flags make more sense as negated values (e.g., "nocolor").
@@ -123,7 +125,7 @@ If not given an output file, the results will only be printed to the terminal.
         raise SystemExit(color('"{}" does not appear to be an XML file'
                                .format(file), 'error', colorize))
     if search:
-        if any(item.startswith('-') for item in search):
+        if any(item.startswith(('-', '/')) for item in search):
             raise SystemExit(color('Command not recognized: {}'.format(search),
                                    'error', colorize))
         else:
@@ -182,6 +184,13 @@ If not given an output file, the results will only be printed to the terminal.
             print_results(results)
         if not quiet:
             msg('Done.', 'info', colorize)
+
+
+# If this is windows, we want the command-line args to use slash intead
+# of hyphen.
+
+if sys.platform.startswith('win'):
+    main.prefix_chars = '/'
 
 
 # Miscellaneous utilities.
