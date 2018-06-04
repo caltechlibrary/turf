@@ -9,7 +9,7 @@ Turf (_TIND.io URL Fixer_) is a program to download records from the Caltech TIN
 
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg?style=flat-square)](https://choosealicense.com/licenses/bsd-3-clause)
 [![Python](https://img.shields.io/badge/Python-3.4+-brightgreen.svg?style=flat-square)](http://shields.io)
-[![Latest release](https://img.shields.io/badge/Latest_release-1.0.0-b44e88.svg?style=flat-square)](http://shields.io)
+[![Latest release](https://img.shields.io/badge/Latest_release-1.0.1-b44e88.svg?style=flat-square)](http://shields.io)
 
 ☀ Introduction
 -----------------------------
@@ -101,7 +101,7 @@ If you find an issue, please submit it in [the GitHub issue tracker](https://git
 
 If you like this software, don't forget to give this repo a star on GitHub to show your support!
 
-☺ Acknowledgments
+☺︎ Acknowledgments
 -----------------------
 
 The vector artwork used as a logo for Turf was created by [Milinda Courey](https://thenounproject.com/milindacourey10/) and obtained from [The Noun Project](https://thenounproject.com/term/grass/231760/).  It is licensed under the Creative Commons [CC-BY 3.0](https://creativecommons.org/licenses/by/3.0/) license.
