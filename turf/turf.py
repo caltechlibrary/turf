@@ -179,8 +179,9 @@ def tind_records(query, start, colorize, quiet):
         conn = http.client.HTTPSConnection(parts.netloc, timeout=_NETWORK_TIMEOUT)
     else:
         conn = http.client.HTTPConnection(parts.netloc, timeout=_NETWORK_TIMEOUT)
-    if __debug__: log('connecting to {}', parts.netloc)
-    conn.request("GET", query, {})
+    if __debug__: log('connecting to {} using url {}', parts.netloc, query)
+    headers = { 'Cookie': _SESSION_COOKIE }
+    conn.request("GET", query, headers = headers)
     response = conn.getresponse()
     if __debug__: log('got response code {}', response.status)
     if response.status in [200, 202]:
