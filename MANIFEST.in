@@ -1,0 +1,10 @@
+recursive-include turf *.py
+recursive-include tests *.py
+recursive-include tests *.xml
+recursive-include .graphics *.svg
+recursive-include .graphics *.png
+include README.md
+include LICENSE
+include requirements.txt
+include codemeta.json
+
