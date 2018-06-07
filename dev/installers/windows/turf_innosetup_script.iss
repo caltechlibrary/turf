@@ -44,10 +44,10 @@ Source: "\\Mac\Home\project-files\library\repos\turf\dist\turf.exe"; DestDir: "{
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
 
 
-[Registry]
 ; This code is from https://stackoverflow.com/a/3431379
 ; with the modification that I make it add the path under both HKLM and HKLM64
 ;
+[Registry]
 Root: HKLM; Subkey: "SYSTEM\CurrentControlSet\Control\Session Manager\Environment"; \
     ValueType: expandsz; ValueName: "Path"; ValueData: "{olddata};{app}"; \
     Check: NeedsAddPath('{app}')
@@ -56,9 +56,9 @@ Root: HKLM64; Subkey: "SYSTEM\CurrentControlSet\Control\Session Manager\Environm
     Check: NeedsAddPath('{app}')
 
 
-[Code]
 ; This function is from https://stackoverflow.com/a/31733896/743730
 ;
+[Code]
 function NeedsAddPath(Param: string): boolean;
 var
     OrigPath: string;
