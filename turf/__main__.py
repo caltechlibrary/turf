@@ -29,11 +29,12 @@ Copyright
 Copyright (c) 2018 by the California Institute of Technology.  This code is
 open-source software released under a 3-clause BSD license.  Please see the
 file "LICENSE" for more information.
-
 '''
 
 import os
+from   os import path
 import plac
+import requests
 import sys
 try:
     from termcolor import colored
@@ -44,6 +45,7 @@ import turf
 from turf import entries_from_file, entries_from_search
 from turf.messages import msg, color
 from turf.writers import write_results
+from turf.data_types import ProxyInfo, UIsettings
 
 
 # Global constants.
@@ -57,20 +59,24 @@ _DEFAULT_SEARCH = 'https://caltech.tind.io/search?ln=en&p=856%3A%25&f=&sf=&so=d'
 # ......................................................................
 
 @plac.annotations(
-    all       = ('write all entries, not only those with URLs',       'flag',   'a'),
-    file      = ('read MARC from file instead of searching tind.io',  'option', 'f'),
-    output    = ('write output to the given file',                    'option', 'o'),
-    quiet     = ('do not print messages while working',               'flag',   'q'),
-    start_at  = ("start with Nth record (default: start at 1)",       'option', 's'),
-    total     = ('stop after processing M records (default: all)',    'option', 't'),
-    unchanged = ("write entries with URLs even if they're unchanged", 'flag',   'u'),
-    no_color  = ('do not color-code terminal output',                 'flag',   'C'),
-    version   = ('print version info and exit',                       'flag',   'V'),
-    search    = 'complete search URL (default: none)',
+    all        = ('write all entries, not only those with URLs',        'flag',   'a'),
+    file       = ('read MARC from file F instead of searching tind.io', 'option', 'f'),
+    unchanged  = ("write entries with URLs even if they're unchanged",  'flag',   'n'),
+    output     = ('write results to the given file R',                  'option', 'o'),
+    pswd       = ('proxy user password',                                'option', 'p'),
+    quiet      = ('do not print messages while working',                'flag',   'q'),
+    start_at   = ("start with Nth record (default: start at 1)",        'option', 's'),
+    total      = ('stop after processing M records (default: all)',     'option', 't'),
+    user       = ('proxy user name',                                    'option', 'u'),
+    no_color   = ('do not color-code terminal output',                  'flag',   'C'),
+    version    = ('print version info and exit',                        'flag',   'V'),
+    no_keyring = ('do not use a keyring',                               'flag',   'X'),
+    search     = 'complete search URL (default: none)',
 )
 
-def main(all=False, file=None, output=None, start_at='N', total='M',
-         unchanged=False, quiet=False, no_color=False, version=False, *search):
+def main(all=False, file='F', unchanged=False, output='R',
+         start_at='N', total='M', user = 'U', pswd = 'P',
+         quiet=False, no_color=False, no_keyring=False, version=False, *search):
     '''Look for caltech.tind.io records containing URLs and return updated URLs.
 
 If not given an explicit search query, it will perform a default search that
@@ -89,30 +95,57 @@ URLs are not found to change after dereferencing.)  If given the -u flag
 unchanged after dereferencing.  If given the -a flag (/a on Windows), it will
 write out all entries retrieved, even those that have no URLs.
 
-If given the -t option (/t on Windows), it will only fetch and process a total
-of that many results instead of all results.  If given the -s option, it will
-start at that entry instead of starting at number 1; this is useful if searches
-are being done in batches or a previous search is interrupted and you don't
-want to restart from 1.
+If given the -t option (/t on Windows), it will only fetch and process a
+total of that many results instead of all results.  If given the -s (/s on
+Windows) option, it will start at that entry instead of starting at number 1;
+this is useful if searches are being done in batches or a previous search is
+interrupted and you don't want to restart from 1.
 
 If given an output file, the results will be written to the file.  The format
 of the file will be deduced from the file name extension (.csv or .xlsx).
 In the absence of a file name extension, it will default to XLSX format.
 If not given an output file, the results will only be printed to the terminal.
 
-    '''
+If the URLs to be dereference involve a proxy server (such as EZproxy, a
+common type of proxy used by academic institutions), it will be necessary to
+supply login credentials for the proxy component.  By default, Turf uses the
+operating system's keyring/keychain functionality to get a user name and
+password.  If the information does not exist from a previous run of Turf, it
+will query the user interactively for the user name and password, and (unless
+the -X or /X argument is given) store them in the user's keyring/keychain so
+that it does not have to ask again in the future.  It is also possible to
+supply the information directly on the command line using the -u and -p
+options (or /u and /p on Windows), but this is discouraged because it is
+insecure on multiuser computer systems.
+
+If you ever need to change the information in the keyring/keychain, you can
+run this program again with the -X option, and it will ask you for the values
+and store them in the keyring again.
+
+This program will print information to the terminal as it processes URLs,
+unless the option -q (or /q on Windows) is given to make it more quiet.
+'''
 
     # Our defaults are to do things like color the output, which means the
     # command line flags make more sense as negated values (e.g., "nocolor").
     # Dealing with negated variables is confusing, so turn them around here.
     colorize = 'termcolor' in sys.modules and not no_color
+    use_keyring = not no_keyring
 
     # We use default values that provide more intuitive help text printed by
     # plac.  Rewrite the values to things we actually use.
+    if file == 'F' and not path.exists('F'):
+        file = None
+    if output == 'R':
+        output = None
     if start_at and start_at == 'N':
         start_at = 1
     if total and total == 'M':
         total = None
+    if user == 'U':
+        user = None
+    if pswd == 'P':
+        pswd = None
 
     # Process arguments.
     if version:
@@ -147,7 +180,7 @@ If not given an output file, the results will only be printed to the terminal.
         else:
             msg('Saving only relevant results', 'info', colorize)
     if output:
-        name, extension = os.path.splitext(output)
+        name, extension = path.splitext(output)
         if extension and extension.lower() not in ['.csv', '.xlsx']:
             raise SystemExit(color('"{}" has an unrecognized file extension'.format(output),
                                    'error', colorize))
@@ -156,25 +189,31 @@ If not given an output file, the results will only be printed to the terminal.
                 'warn', colorize)
     start_at = int(start_at)
 
+    # General sanity checks.
+    if not network_available():
+        raise SystemExit(color('No network', 'error', colorize))
+
     # Let's do this thing.
+    uisettings = UIsettings(colorize = colorize, quiet = quiet)
+    proxyinfo = ProxyInfo(user = user, password = pswd, use_keyring = use_keyring)
     results = []
     try:
         if file:
             input = None
-            if os.path.exists(file):
+            if path.exists(file):
                 input = file
-            elif os.path.exists(os.path.join(os.getcwd(), file)):
-                input = os.path.join(os.getcwd(), file)
+            elif path.exists(path.join(os.getcwd(), file)):
+                input = path.join(os.getcwd(), file)
             else:
                 raise SystemExit(color('Cannot find file "{}"'.format(file),
                                        'error', colorize))
             if not quiet:
                 msg('Reading MARC XML from {}'.format(input), 'info', colorize)
-            results = entries_from_file(input, total, start_at, colorize, quiet)
+            results = entries_from_file(input, total, start_at, proxyinfo, uisettings)
         else:
-            results = entries_from_search(search, total, start_at, colorize, quiet)
+            results = entries_from_search(search, total, start_at, proxyinfo, uisettings)
     except Exception as e:
-        msg('Exception encountered: {}'.format(e))
+        msg('Exception encountered: {}'.format(e), 'error', colorize)
     finally:
         if not results:
             msg('No results returned.', 'warn', colorize)
@@ -208,6 +247,15 @@ def print_results(results):
         # Need to consume the values from the iterator in order for
         # the underlying object to print itself.
         pass
+
+
+def network_available():
+    '''Return True if it appears we have a network connection, False if not'''
+    try:
+        r = requests.get("https://www.caltech.edu")
+        return True
+    except requests.ConnectionError:
+        return False
 
 
 # Main entry point.
