@@ -199,8 +199,7 @@ unless the option -q (or /q on Windows) is given to make it more quiet.
 
     # Let's do this thing.
     uisettings = UIsettings(colorize = colorize, quiet = quiet)
-    proxyinfo = ProxyInfo(user = user, password = pswd,
-                          use_keyring = use_keyring, reset = reset)
+    proxyinfo = ProxyInfo(user, pswd, use_keyring, reset)
     results = []
     try:
         if file:
