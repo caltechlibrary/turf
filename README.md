@@ -84,18 +84,18 @@ Finally, the following table summarizes all the command line options available. 
 | Short    | Long&nbsp;form&nbsp;option | Meaning | Default |
 |----------|---------------|----------------------|---------|
 | `-a`     | `--all`       | Save all records, not only those with URLs in MARC field 856 (implies `-n`) | Only write records containing URLs |
-| `-f`     | `--file`      | Read MARC XML content from the named file | Search caltech.tind.io | 
-| `-o`     | `--output`    | Save output to the named file | Only print results to the terminal |
-| `-n`     | `--unchanged` | Include records whose URLs don't change after dereferencing them | Only save records whose URLs change |
+| `-f`_F_  | `--file`_F_   | Read MARC XML content from file _F_ | Search caltech.tind.io | 
+| `-o`_R_  | `--output`_R_ | Save results to file _R_ | Only print results to the terminal |
 | `-s`_N_  | `--start-at`_N_  | Start with the <i>N</i><sup>th</sup> record | Start at the first record |
 | `-t`_M_  | `--total`_M_     | Stop after processing _M_ records | Process all results found |
+| `-n`     | `--unchanged` | Include records whose URLs don't change after dereferencing them | Only save records whose URLs change |
 | `-u`_U_ | `--user`_U_       | User name for proxy login | Prompt for name |
 | `-p`_P_ | `--pswd`_U_       | Password for proxy login | Prompt for password |
+| `-R`     | `--reset`     | Reset proxy name & password | Reuse stored credentials |
+| `-X`     | `--no-keyring` | Do not read/write the system keyring/keychain | Store proxy credentials |
 | `-q`     | `--quiet`     | Don't print messages while working | Be chatty while working |
 | `-C`     | `--no-color`  | Don't color-code the terminal output | Use colors in the output |
-| `-R`     | `--reset`     | Reset proxy name & password | Reuse stored credentials |
 | `-V`     | `--version`   | Only print program version info and exit | Do other actions instead |
-| `-X`     | `--no-keyring` | Do not read/write the system keyring/keychain | Store proxy credentials |
 
 
 ⁇ Getting help and support
