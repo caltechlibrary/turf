@@ -39,7 +39,7 @@ Both of these installation approaches should automatically install some Python d
 ▶︎ Basic operation
 ------------------
 
-Turf is a command-line application.  On Linux and macOS systems, the installation _should_ place a new program on your shell's search path, so that you can start Turf with a simple terminal command:
+Turf is a command-line application.  On all systems, the installation _should_ place a new program on your shell's search path called `turf` (or `turf.exe` on Windows), so that you can start Turf with a simple terminal command:
 ```
 turf
 ```
@@ -49,7 +49,7 @@ If that fails because the shell cannot find the command, you should be able to r
 python3 -m turf
 ```
 
-It accepts various command-line arguments.  To get information about the available options, use the `-h` argument:
+Turf accepts various command-line arguments.  To get information about the available options, use the `-h` argument (or `/h` on Windows):
 ```
 turf -h
 ```
@@ -64,9 +64,9 @@ Turf won't write the results to a file unless told to do so using the `-o` optio
 turf -o results.xlsx
 ```
 
-By default, Turf prints a message for every record it processes, so that the user can get a sense of what is happening.  When told to save results to a file, however, it does _not_ write every record by default.  Instead, by default, it saves only the records that contain URLs and for which the URLs are found to dereference to a different final destination.  This behavior can be controlled via two flags, `-u` and `-a`.  If given `-u` (`/u` on Windows), Turf will write out records with URLs even if the URLs dereference to the same location.  If given `-a` (`/a` on Windows), Turf will write all records even if they don't have any URLs.
+By default, Turf prints a message for every record it processes, so that the user can get a sense of what is happening.  When told to save results to a file, however, it does _not_ write every record by default.  Instead, by default, it saves only the records that contain URLs and for which the URLs are found to dereference to a different final destination.  This behavior can be controlled via two flags, `-n` and `-a`.  If given `-n` (`/n` on Windows), Turf will write out records with URLs even if the URLs dereference to the same location.  If given `-a` (`/a` on Windows), Turf will write all records even if they don't have any URLs.
 
-The difference between `-a` and `-u` (`/a` and `/u` on Windows) is not evident from the default search performed by Turf because it only searches for records with URLs; however, the difference is easier to see when Turf is given a more general search such query such as the following
+The difference between `-a` and `-n` (`/a` and `/n` on Windows) is not evident from the default search performed by Turf because it only searches for records with URLs; however, the difference is easier to see when Turf is given a more general search such query such as the following
 
 ```
 https://caltech.tind.io/search?action_search=Search&rm=wrd&so=d
@@ -77,19 +77,25 @@ which will retrieve all records.  The following screencast tries to demonstrate 
 [![demo](.graphics/turf-asciinema.png)](https://asciinema.org/a/kFvuHPMX51zhc95P1zDeqrmjQ)
 
 
+If the URLs to be dereference involve a proxy server (such as EZproxy, a common type of proxy used by academic institutions), it will be necessary to supply login credentials for the proxy component.  By default, Turf uses the operating system's keyring/keychain functionality to get a user name and password.  If the information does not exist from a previous run of Turf, it will query the user interactively for the user name and password, and (unless the `-X` or `/X` argument is given) store them in the user's keyring/keychain so that it does not have to ask again in the future.  It is also possible to supply the information directly on the command line using the `-u` and `-p` options (or `/u` and `/p` on Windows), but this is discouraged because it is insecure on multiuser computer systems.
+
 Finally, the following table summarizes all the command line options available. (Note: on Windows computers, `/` must be used instead of `-`):
 
 | Short    | Long&nbsp;form&nbsp;option | Meaning | Default |
 |----------|---------------|----------------------|---------|
-| `-a`     | `--all`       | Save all records, not only those with URLs in MARC field 856 (implies `-u`) | Only write records containing URLs |
+| `-a`     | `--all`       | Save all records, not only those with URLs in MARC field 856 (implies `-n`) | Only write records containing URLs |
 | `-f`     | `--file`      | Read MARC XML content from the named file | Search caltech.tind.io | 
 | `-o`     | `--output`    | Save output to the named file | Only print results to the terminal |
+| `-n`     | `--unchanged` | Include records whose URLs don't change after dereferencing them | Only save records whose URLs change |
 | `-s`_N_  | `--start-at`_N_  | Start with the <i>N</i><sup>th</sup> record | Start at the first record |
 | `-t`_M_  | `--total`_M_     | Stop after processing _M_ records | Process all results found |
-| `-u`     | `--unchanged` | Include records whose URLs don't change after dereferencing them | Only save records whose URLs change |
+| `-u`_U_ | `--user`_U_       | User name for proxy login | Prompt for name |
+| `-p`_P_ | `--pswd`_U_       | Password for proxy login | Prompt for password |
 | `-q`     | `--quiet`     | Don't print messages while working | Be chatty while working |
 | `-C`     | `--no-color`  | Don't color-code the terminal output | Use colors in the output |
-| `-V`     | `--version`   | Only print program version info and exit | Do other work |
+| `-R`     | `--reset`     | Reset proxy name & password | Reuse stored credentials |
+| `-V`     | `--version`   | Only print program version info and exit | Do other actions instead |
+| `-X`     | `--no-keyring` | Do not read/write the system keyring/keychain | Store proxy credentials |
 
 
 ⁇ Getting help and support
