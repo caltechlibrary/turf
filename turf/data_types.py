@@ -16,13 +16,38 @@ file "LICENSE" for more information.
 
 from   collections import namedtuple
 
-TindData = namedtuple('TindData', 'id url_data')
-TindData.__doc__ = '''Named tuple storing the id and UrlData for an entry.
-'''
+class TindData():
+    '''Named tuple storing the id and UrlData for an entry.'''
 
-ProxyInfo = namedtuple('ProxyInfo', 'user password use_keyring reset')
-ProxyInfo.__doc__ = '''Named tuple storing data for proxy logins'
-'''
+    id = None
+    url_data = None
 
-UIsettings = namedtuple('UIsettings', 'colorize quiet')
-UIsettings.__doc__ = '''Named tuple storing run-time display settings'''
+    def __init__(self, id = None, url_data = None):
+        self.id = id
+        self.url_data = url_data
+
+
+class ProxyInfo():
+    '''Named tuple storing data for proxy logins.'''
+
+    user = None
+    password = None
+    use_keyring = True
+    reset = False
+
+    def __init__(self, user = None, pswd = None, use_keyring = True, reset = False):
+        self.user = user
+        self.password = pswd
+        self.use_keyring = use_keyring
+        self.reset = reset
+
+
+class UIsettings():
+    '''Named tuple storing run-time display settings.'''
+
+    colorize = False
+    quiet = True
+
+    def __init__(self, colorize = False, quiet = True):
+        self.colorize = colorize
+        self.quiet = quiet
