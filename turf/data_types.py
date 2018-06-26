@@ -20,7 +20,7 @@ TindData = namedtuple('TindData', 'id url_data')
 TindData.__doc__ = '''Named tuple storing the id and UrlData for an entry.
 '''
 
-ProxyInfo = namedtuple('ProxyInfo', 'user password use_keyring')
+ProxyInfo = namedtuple('ProxyInfo', 'user password use_keyring reset')
 ProxyInfo.__doc__ = '''Named tuple storing data for proxy logins'
 '''
 

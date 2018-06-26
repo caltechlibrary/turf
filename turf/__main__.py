@@ -69,14 +69,16 @@ _DEFAULT_SEARCH = 'https://caltech.tind.io/search?ln=en&p=856%3A%25&f=&sf=&so=d'
     total      = ('stop after processing M records (default: all)',     'option', 't'),
     user       = ('proxy user name',                                    'option', 'u'),
     no_color   = ('do not color-code terminal output',                  'flag',   'C'),
+    reset      = ('reset proxy user name and password'   ,              'flag',   'R'),
     version    = ('print version info and exit',                        'flag',   'V'),
     no_keyring = ('do not use a keyring',                               'flag',   'X'),
     search     = 'complete search URL (default: none)',
 )
 
-def main(all=False, file='F', unchanged=False, output='R',
-         start_at='N', total='M', user = 'U', pswd = 'P',
-         quiet=False, no_color=False, no_keyring=False, version=False, *search):
+def main(all = False, file = 'F', unchanged = False, output = 'R',
+         start_at = 'N', total = 'M', user  =  'U', pswd  =  'P',
+         quiet = False, no_color = False, no_keyring = False, reset = False,
+         version = False, *search):
     '''Look for caltech.tind.io records containing URLs and return updated URLs.
 
 If not given an explicit search query, it will perform a default search that
@@ -118,9 +120,11 @@ supply the information directly on the command line using the -u and -p
 options (or /u and /p on Windows), but this is discouraged because it is
 insecure on multiuser computer systems.
 
-If you ever need to change the information in the keyring/keychain, you can
-run this program again with the -X option, and it will ask you for the values
-and store them in the keyring again.
+To reset the user name and password (e.g., if a mistake was made the last time
+and the wrong credentials were stored in the keyring/keychain system), add the
+-R (or /R on Windows) command-line argument to a command.  The next time
+Urlup needs to use a proxy login, it will query for the user name and password
+again even if an entry already exists in the keyring or keychain.
 
 This program will print information to the terminal as it processes URLs,
 unless the option -q (or /q on Windows) is given to make it more quiet.
@@ -195,7 +199,8 @@ unless the option -q (or /q on Windows) is given to make it more quiet.
 
     # Let's do this thing.
     uisettings = UIsettings(colorize = colorize, quiet = quiet)
-    proxyinfo = ProxyInfo(user = user, password = pswd, use_keyring = use_keyring)
+    proxyinfo = ProxyInfo(user = user, password = pswd,
+                          use_keyring = use_keyring, reset = reset)
     results = []
     try:
         if file:
