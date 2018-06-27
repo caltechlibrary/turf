@@ -65,7 +65,7 @@ def write_results(filename, results, include_unchanged, all):
         write_xls(filename, results, include_unchanged, all)
 
 
-def write_csv(filename, results, include_unchanged, all):
+def write_csv(filename, tind_results, include_unchanged, all):
     file = open(filename, 'w', newline='')
 
     # Write the header row.
@@ -75,27 +75,25 @@ def write_csv(filename, results, include_unchanged, all):
     file.write(text + '\n')
     csvwriter = csv.writer(file, delimiter=',')
     try:
-        for data in results:
-            if not data:
+        for item in tind_results:
+            if not item:
                 if __debug__: log('no data -- stopping')
                 break
-            tind_id = data[0]
-            data_list = data[1]
-            if not data_list and not all:
-                if __debug__: log('no URLs for {} -- not saving'.format(tind_id))
+            if not item.url_data and not all:
+                if __debug__: log('no URLs for {} -- not saving'.format(item.id))
                 continue
-            if not contains_changed_urls(data_list) and not (include_unchanged or all):
-                if __debug__: log('URLs unchanged for {} -- skipping'.format(tind_id))
+            if not contains_changed_urls(item.url_data) and not (include_unchanged or all):
+                if __debug__: log('URLs unchanged for {} -- skipping'.format(item.id))
                 continue
-            row = [tind_id]
-            if __debug__: log('writing row for {}'.format(tind_id))
-            for url_data in data_list:
+            row = [item.id]
+            if __debug__: log('writing row for {}'.format(item.id))
+            for url_data in item.url_data:
                 row.append(url_data.original)
                 if url_data.error:
                     row.append('(error: {})'.format(url_data.error))
                 else:
                     row.append(url_data.final or '')
-            if data_list or all:
+            if item.url_data or all:
                 csvwriter.writerow(row)
                 file.flush()
     except KeyboardInterrupt:
@@ -106,7 +104,7 @@ def write_csv(filename, results, include_unchanged, all):
         file.close()
 
 
-def write_xls(filename, results, include_unchanged, all):
+def write_xls(filename, tind_results, include_unchanged, all):
     # Create some things we reuse below.
     bold_style = Font(bold = True, underline = "single")
     hyperlink_style = Font(underline='single', color='0563C1')
@@ -142,24 +140,22 @@ def write_xls(filename, results, include_unchanged, all):
 
     # Now create the data rows.
     try:
-        for row_number, data in enumerate(results, 2):
-            if not data:
+        for row_number, item in enumerate(tind_results, 2):
+            if not item:
                 if __debug__: log('no data -- stopping')
                 break
-            tind_id = data[0]
-            data_list = data[1]
-            if not data_list and not all:
-                if __debug__: log('no URLs for {} -- not saving'.format(tind_id))
+            if not item.url_data and not all:
+                if __debug__: log('no URLs for {} -- not saving'.format(item.id))
                 continue
-            if not contains_changed_urls(data_list) and not (include_unchanged or all):
-                if __debug__: log('URLs unchanged for {} -- skipping'.format(tind_id))
+            if not contains_changed_urls(item.url_data) and not (include_unchanged or all):
+                if __debug__: log('URLs unchanged for {} -- skipping'.format(item.id))
                 continue
             if __debug__: log('writing row {}'.format(row_number))
-            cell = WriteOnlyCell(sheet, value = tind_id)
-            cell.value = hyperlink(tind_entry_url(tind_id), tind_id)
+            cell = WriteOnlyCell(sheet, value = item.id)
+            cell.value = hyperlink(tind_entry_url(item.id), item.id)
             cell.font = hyperlink_style
             row = [cell]
-            for url_data in data_list:
+            for url_data in item.url_data:
                 cell = WriteOnlyCell(sheet, value = url_data.original)
                 cell.value = hyperlink(url_data.original)
                 cell.font = hyperlink_style
