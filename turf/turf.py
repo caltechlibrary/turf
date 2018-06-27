@@ -20,6 +20,7 @@ from   http.client import responses as http_responses
 from   itertools import zip_longest
 import os
 import plac
+import re
 import sys
 from   time import time, sleep
 from   urllib.parse import urlsplit
@@ -191,11 +192,12 @@ def _extracted_data(marcxml, proxyinfo):
         cookies = {'EBSESSIONID': '79e365c204f844af99f26dd45fedf6e1',
                    'EBUQUSER': '79e365c204f844af99f26dd45fedf6e1'}
         if __debug__: log('calling urlup on record ' + id)
-        url_data = updated_urls(original_urls, cookies, headers,
-                                proxyinfo.user, proxyinfo.password,
-                                proxyinfo.use_keyring, proxyinfo.reset)
-        if __debug__: log('got {} URLs for {}', len(url_data), id)
-        yield TindData(id, url_data)
+        url_data_list = updated_urls(original_urls, cookies, headers,
+                                     proxyinfo.user, proxyinfo.password,
+                                     proxyinfo.use_keyring, proxyinfo.reset)
+        if __debug__: log('got {} URLs for {}', len(url_data_list), id)
+        url_data_list = list(map(rewrite_url, url_data_list))
+        yield TindData(id, url_data_list)
 
 
 def tind_records(query, start, proxyinfo):
@@ -220,6 +222,28 @@ def tind_records(query, start, proxyinfo):
 
 def num_records(marcxml):
     return len(marcxml.findall('{http://www.loc.gov/MARC21/slim}record'))
+
+
+# This is a start.  Probabaly will have to create an objection and better
+# organization if more URLs are needed in the future.
+
+_recognized_patterns = [
+    r'https://ebookcentral.proquest.com/auth/lib/caltech-ebooks/maintenance.action\?returnURL=(http.*)$',
+]
+
+def rewrite_url(url_data):
+    for pat in _recognized_patterns:
+        content_match = re.match(pat, url_data.final)
+        if content_match:
+            real_destination = decoded_html(content_match.group(1))
+            return UrlData(url_data.original, real_destination,
+                           url_data.status, url_data.error)
+    return url_data
+
+
+def recognized_url(url):
+    return any(re.match(case[0], url) for case in _rewritable_urls)
+
 
 
 # Miscellaneous utilities.
@@ -257,16 +281,18 @@ def eds_url(url):
 
 
 htmlCodes = (
-    ('&amp;', '&'),
-    ('&#39;', "'"),
-    ('&quot;', '"'),
-    ('&gt;', '>'),
-    ('&lt;', '<'),
-    ('%2B', '+'),
-    ('%2C', ','),
-    ('%20', ' '),
-    ('%3D', '='),
-    ('%3F', '?'),
+    (r'&amp;', '&'),
+    (r'&#39;', "'"),
+    (r'&quot;', '"'),
+    (r'&gt;', '>'),
+    (r'&lt;', '<'),
+    (r'%2B', '+'),
+    (r'%2C', ','),
+    (r'%2F', '/'),
+    (r'%20', ' '),
+    (r'%3A', ':'),
+    (r'%3D', '='),
+    (r'%3F', '?'),
 )
 
 
