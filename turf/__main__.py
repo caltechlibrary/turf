@@ -60,9 +60,9 @@ _DEFAULT_SEARCH = 'https://caltech.tind.io/search?ln=en&p=856%3A%25&f=&sf=&so=d'
 
 @plac.annotations(
     all        = ('write all entries, not only those with URLs',        'flag',   'a'),
-    file       = ('read MARC from file F instead of searching tind.io', 'option', 'f'),
     unchanged  = ("write entries with URLs even if they're unchanged",  'flag',   'n'),
-    output     = ('write results to the given file R',                  'option', 'o'),
+    file       = ('read MARC from file F instead of searching tind.io', 'option', 'f'),
+    output     = ('write results to the file R',                        'option', 'o'),
     pswd       = ('proxy user password',                                'option', 'p'),
     quiet      = ('do not print messages while working',                'flag',   'q'),
     start_at   = ("start with Nth record (default: start at 1)",        'option', 's'),
@@ -75,7 +75,7 @@ _DEFAULT_SEARCH = 'https://caltech.tind.io/search?ln=en&p=856%3A%25&f=&sf=&so=d'
     search     = 'complete search URL (default: none)',
 )
 
-def main(all = False, file = 'F', unchanged = False, output = 'R',
+def main(file = 'F', output = 'R', all = False, unchanged = False,
          start_at = 'N', total = 'M', user  =  'U', pswd  =  'P',
          quiet = False, no_color = False, no_keyring = False, reset = False,
          version = False, *search):
@@ -89,13 +89,19 @@ browser address bar after performing some exploratory searches in
 caltech.tind.io).  If given a file using the -f option (/f on Windows), the
 file should contain MARC XML content.
 
+It is best to quote the search string, using double quotes on Windows and
+single quotes on Linux/Unix, to avoid terminal shells interpreting special
+characters such as question marks in the search string.  Example (for Windows):
+
+   turf "https://caltech.tind.io/search?ln=en&p=856%3A%27ebrary%27"
+
 By default, this program only writes out entries that have URLs in MARC field
 856, and then only those whose URLs are found to dereference to a different
 URL after following it.  (That is, by default, it skips writing entries whose
-URLs are not found to change after dereferencing.)  If given the -u flag
-(/u on Windows), it will write out entries with URLs even if the URLs are
-unchanged after dereferencing.  If given the -a flag (/a on Windows), it will
-write out all entries retrieved, even those that have no URLs.
+URLs do not change after dereferencing.)  If given the -u flag (/u on
+Windows), it will write out entries with URLs even if the URLs are unchanged
+after dereferencing.  If given the -a flag (/a on Windows), it will write out
+all TIND entries retrieved, even those that have no URLs.
 
 If given the -t option (/t on Windows), it will only fetch and process a
 total of that many results instead of all results.  If given the -s (/s on
@@ -103,16 +109,17 @@ Windows) option, it will start at that entry instead of starting at number 1;
 this is useful if searches are being done in batches or a previous search is
 interrupted and you don't want to restart from 1.
 
-If given an output file, the results will be written to the file.  The format
-of the file will be deduced from the file name extension (.csv or .xlsx).
-In the absence of a file name extension, it will default to XLSX format.
-If not given an output file, the results will only be printed to the terminal.
+If given an output file using the -o option (/o on Windows), the results will
+be written to that file.  The format of the file will be deduced from the file
+name extension (.csv or .xlsx).  In the absence of a file name extension, it
+will default to XLSX format.  If not given an output file, the results will
+only be printed to the terminal.
 
-If the URLs to be dereference involve a proxy server (such as EZproxy, a
+If the URLs to be dereferenced involve a proxy server (such as EZproxy, a
 common type of proxy used by academic institutions), it will be necessary to
 supply login credentials for the proxy component.  By default, Turf uses the
-operating system's keyring/keychain functionality to get a user name and
-password.  If the information does not exist from a previous run of Turf, it
+operating system's keyring/keychain functionality to remember the user name
+and password.  If the information does not exist from a previous run, Turf
 will query the user interactively for the user name and password, and (unless
 the -X or /X argument is given) store them in the user's keyring/keychain so
 that it does not have to ask again in the future.  It is also possible to
