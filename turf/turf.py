@@ -233,6 +233,8 @@ _recognized_patterns = [
 
 def rewrite_url(url_data):
     for pat in _recognized_patterns:
+        if not url_data.final:
+            continue
         content_match = re.match(pat, url_data.final)
         if content_match:
             real_destination = decoded_html(content_match.group(1))
