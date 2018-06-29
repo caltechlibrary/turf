@@ -185,7 +185,7 @@ def _extracted_data(marcxml, proxyinfo):
         # Setting the user agent is because Proquest.com returns a 403
         # otherwise, possibly as an attempt to block automated scraping.
         # Changing the user agent to a browser name seems to solve it.
-        headers = {'User-Agent': 'Mozilla/5.0'}
+        headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X x.y; rv:42.0)'}
         # This next thing is a hack that makes ebscohost think we're logged in.
         # It's the only way I found so far to avoid the occasional "upcoming
         # maintenance" announcement click-through pages.
