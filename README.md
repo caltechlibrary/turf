@@ -10,7 +10,7 @@ Turf (_TIND.io URL Fixer_) is a program to download records from the Caltech TIN
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg?style=flat-square)](https://choosealicense.com/licenses/bsd-3-clause)
 [![Python](https://img.shields.io/badge/Python-3.4+-brightgreen.svg?style=flat-square)](http://shields.io)
 [![Latest release](https://img.shields.io/badge/Latest_release-1.2.0-b44e88.svg?style=flat-square)](http://shields.io)
-[![DOI](http://img.shields.io/badge/DOI-10.22002%20%2F%20D1.968-blue.svg?style=flat-square)](https://data.caltech.edu/records/968)
+[![DOI](http://img.shields.io/badge/DOI-10.22002%20%2F%20D1.969-blue.svg?style=flat-square)](https://data.caltech.edu/records/969)
 
 ☀ Introduction
 -----------------------------
