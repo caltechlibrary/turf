@@ -61,6 +61,10 @@ some speed.'''
 _NETWORK_TIMEOUT = 15
 '''How long to wait on a network connection attempt.'''
 
+_MAX_NULLS = 10
+'''How many consecutive empty results we accept before we assume that
+something is going wrong.'''
+
 # This is a cookie I extracted from a past session, and it seems to work to
 # keep reusing it, which makes me think their service only checks for the
 # valid form of a cookie value and not anything about the actual value used.
@@ -98,6 +102,9 @@ def entries_from_search(search, max_records, start_index, proxyinfo, uisettings)
     # when iterating over all results, we must do something ourselves to avoid
     # fetching the last page over and over.  We watch for entries we've seen.
     seen = set()
+    # Sometimes the server stops returning values.  Unclear why, but when it
+    # happens we may as well stop.  We track it using this variable:
+    consecutive_nulls = 0
     while 0 < current < stop:
         try:
             marcxml = tind_records(search, current, proxyinfo)
@@ -111,6 +118,14 @@ def entries_from_search(search, max_records, start_index, proxyinfo, uisettings)
                     stop = 0
                 else:
                     seen.add(data.id)
+                if not data.url_data:
+                    consecutive_nulls += 1
+                    if __debug__: log('{} consecutive nulls'.format(consecutive_nulls))
+                else:
+                    consecutive_nulls = 0
+                if consecutive_nulls >= _MAX_NULLS:
+                    msg('Server stopped responding', 'error', uisettings.colorize)
+                    stop = 0
                 if not uisettings.quiet:
                     print_record(current, data, uisettings.colorize)
                 yield data
@@ -127,7 +142,7 @@ def entries_from_search(search, max_records, start_index, proxyinfo, uisettings)
             msg('Error: {}'.format(err), 'error', uisettings.colorize)
             current = -1
         sleep(0.5)                      # Be nice to the server.
-    if current >= stop:
+    if current >= stop and consecutive_nulls < _MAX_NULLS:
         if __debug__: log('stopping point reached')
         if not uisettings.quiet:
             msg('Processed {} entries'.format(len(seen)), 'info', uisettings.colorize)
