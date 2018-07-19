@@ -13,7 +13,6 @@ Copyright (c) 2018 by the California Institute of Technology.  This code is
 open-source software.  Please see the file "LICENSE" for more information.
 '''
 
-
 from   collections import namedtuple
 import http.client
 from   http.client import responses as http_responses
@@ -105,12 +104,13 @@ def entries_from_search(search, max_records, start_index, proxyinfo, uisettings)
     # Sometimes the server stops returning values.  Unclear why, but when it
     # happens we may as well stop.  We track it using this variable:
     consecutive_nulls = 0
-    while 0 < current < stop:
+    while 0 < current < stop and consecutive_nulls < _MAX_NULLS:
         try:
             marcxml = tind_records(search, current, proxyinfo)
             if not marcxml:
                 if __debug__: log('no records received')
                 current = -1
+                consecutive_nulls += 1
                 break
             if __debug__: log('looping over {} TIND records', len(marcxml))
             for data in _extracted_data(marcxml, proxyinfo):
@@ -120,12 +120,8 @@ def entries_from_search(search, max_records, start_index, proxyinfo, uisettings)
                     seen.add(data.id)
                 if not data.url_data:
                     consecutive_nulls += 1
-                    if __debug__: log('{} consecutive nulls'.format(consecutive_nulls))
                 else:
                     consecutive_nulls = 0
-                if consecutive_nulls >= _MAX_NULLS:
-                    msg('Server stopped responding', 'error', uisettings.colorize)
-                    stop = 0
                 if not uisettings.quiet:
                     print_record(current, data, uisettings.colorize)
                 yield data
@@ -146,6 +142,10 @@ def entries_from_search(search, max_records, start_index, proxyinfo, uisettings)
         if __debug__: log('stopping point reached')
         if not uisettings.quiet:
             msg('Processed {} entries'.format(len(seen)), 'info', uisettings.colorize)
+    elif consecutive_nulls >= _MAX_NULLS:
+        if not uisettings.quiet:
+            msg('Too many consecutive null responses -- something is wrong',
+                'error', uisettings.colorize)
     yield None
 
 
