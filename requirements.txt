@@ -4,3 +4,5 @@ plac>=0.9.6
 uritools>=2.1.0
 openpyxl>=2.5.0
 urlup>=1.4.1
+requests>=2.19.0
+
