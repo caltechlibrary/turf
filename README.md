@@ -113,6 +113,19 @@ If you like this software, don't forget to give this repo a star on GitHub to sh
 
 The vector artwork used as a logo for Turf was created by [Milinda Courey](https://thenounproject.com/milindacourey10/) and obtained from [The Noun Project](https://thenounproject.com/term/grass/231760/).  It is licensed under the Creative Commons [CC-BY 3.0](https://creativecommons.org/licenses/by/3.0/) license.
 
+Turf was makes use of numerous open-source packages, without which it would have been effectively impossible to develop Turf with the resources we had.  We want to acknowledge this debt.  In alphabetical order, the packages are:
+
+* [colorama](https://github.com/tartley/colorama) &ndash; makes ANSI escape character sequences work under MS Windows terminals
+* [ipdb](https://github.com/gotcha/ipdb) &ndash; the IPython debugger
+* [openpyxl](https://openpyxl.readthedocs.io/en/stable/) &ndash; a library to
+  read/write Excel `.xlsx` and `.xlsm` files
+* [plac](http://micheles.github.io/plac/) &ndash; a command line argument parser
+* [requests](http://docs.python-requests.org) &ndash; an HTTP library for Python
+* [setuptools](https://github.com/pypa/setuptools) &ndash; library for `setup.py`
+* [termcolor](https://pypi.org/project/termcolor/) &ndash; ANSI color formatting for output in terminal
+* [uritools](https://github.com/tkem/uritools/) &ndash; RFC 3986 compliant, Unicode-aware, scheme-agnostic replacement for urlparse
+* [urlup](https://github.com/caltechlibrary/urlup) &ndash; finds the ultimate destination for URLs after following redirections
+
 ☮︎ Copyright and license
 ---------------------
 
