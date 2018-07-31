@@ -17,7 +17,7 @@ file "LICENSE" for more information.
 from   collections import namedtuple
 
 class TindData():
-    '''Named tuple storing the id and UrlData for an entry.'''
+    '''Class object to store the id and UrlData for an entry.'''
 
     id = None
     url_data = None
@@ -28,7 +28,7 @@ class TindData():
 
 
 class ProxyInfo():
-    '''Named tuple storing data for proxy logins.'''
+    '''Class object to store data for proxy logins.'''
 
     user = None
     password = None
@@ -43,7 +43,7 @@ class ProxyInfo():
 
 
 class UIsettings():
-    '''Named tuple storing run-time display settings.'''
+    '''Class object to store run-time display settings.'''
 
     colorize = False
     quiet = True
